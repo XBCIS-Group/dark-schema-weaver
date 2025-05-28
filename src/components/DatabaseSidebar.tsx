@@ -32,17 +32,26 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 
+interface Column {
+  id: string;
+  name: string;
+  type: string;
+  nullable: boolean;
+  primaryKey: boolean;
+  unique: boolean;
+}
+
+interface TableType {
+  id: string;
+  name: string;
+  columns: Column[];
+  rows: Record<string, any>[];
+}
+
 interface Database {
   id: string;
   name: string;
-  tables: Table[];
-}
-
-interface Table {
-  id: string;
-  name: string;
-  columns: number;
-  rows: number;
+  tables: TableType[];
 }
 
 interface DatabaseSidebarProps {
@@ -158,7 +167,7 @@ export function DatabaseSidebar({
                               <span className="text-sm">{table.name}</span>
                             </div>
                             <span className="text-xs text-muted-foreground">
-                              {table.rows}
+                              {table.rows.length}
                             </span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

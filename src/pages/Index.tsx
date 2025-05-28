@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeProvider, useTheme } from '@/components/ThemeProvider';
@@ -11,11 +12,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon } from 'lucide-react';
 
+interface Column {
+  id: string;
+  name: string;
+  type: string;
+  nullable: boolean;
+  primaryKey: boolean;
+  unique: boolean;
+}
+
 interface Table {
   id: string;
   name: string;
-  columns: number;
-  rows: number;
+  columns: Column[];
+  rows: Record<string, any>[];
 }
 
 interface Database {
@@ -86,8 +96,8 @@ const Index = () => {
     const newTable: Table = {
       id: Date.now().toString(),
       name,
-      columns: 0,
-      rows: 0,
+      columns: [],
+      rows: [],
     };
 
     setDatabases(prev => prev.map(db => 
