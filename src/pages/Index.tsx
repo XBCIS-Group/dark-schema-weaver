@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -6,12 +5,21 @@ import { DatabaseSidebar } from '@/components/DatabaseSidebar';
 import { TableView } from '@/components/TableView';
 import { SchemaEditor } from '@/components/SchemaEditor';
 import { CreateDatabaseDialog } from '@/components/CreateDatabaseDialog';
+import { CreateTableDialog } from '@/components/CreateTableDialog';
+import { EditDatabaseDialog } from '@/components/EditDatabaseDialog';
 import { useToast } from '@/hooks/use-toast';
+
+interface Table {
+  id: string;
+  name: string;
+  columns: number;
+  rows: number;
+}
 
 interface Database {
   id: string;
   name: string;
-  tables: any[];
+  tables: Table[];
 }
 
 const Index = () => {
@@ -20,6 +28,9 @@ const Index = () => {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [schemaEditorOpen, setSchemaEditorOpen] = useState(false);
   const [createDatabaseOpen, setCreateDatabaseOpen] = useState(false);
+  const [createTableOpen, setCreateTableOpen] = useState(false);
+  const [editDatabaseOpen, setEditDatabaseOpen] = useState(false);
+  const [editingDatabase, setEditingDatabase] = useState<Database | null>(null);
   const { toast } = useToast();
 
   const handleCreateDatabase = () => {
@@ -41,9 +52,59 @@ const Index = () => {
   };
 
   const handleCreateTable = () => {
+    if (!selectedDatabase) {
+      toast({
+        title: "No Database Selected",
+        description: "Please select a database first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setCreateTableOpen(true);
+  };
+
+  const handleCreateTableSubmit = (name: string) => {
+    if (!selectedDatabase) return;
+
+    const newTable: Table = {
+      id: Date.now().toString(),
+      name,
+      columns: 0,
+      rows: 0,
+    };
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? { ...db, tables: [...db.tables, newTable] }
+        : db
+    ));
+
     toast({
-      title: "Create Table",
-      description: "Table creation functionality would be implemented here.",
+      title: "Table Created",
+      description: `Table "${name}" has been created successfully.`,
+    });
+  };
+
+  const handleEditDatabase = (id: string) => {
+    const database = databases.find(db => db.id === id);
+    if (database) {
+      setEditingDatabase(database);
+      setEditDatabaseOpen(true);
+    }
+  };
+
+  const handleEditDatabaseSubmit = (name: string) => {
+    if (!editingDatabase) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === editingDatabase.id 
+        ? { ...db, name }
+        : db
+    ));
+
+    toast({
+      title: "Database Updated",
+      description: `Database has been renamed to "${name}".`,
     });
   };
 
@@ -122,6 +183,7 @@ const Index = () => {
               onSelectTable={setSelectedTable}
               onCreateDatabase={handleCreateDatabase}
               onCreateTable={handleCreateTable}
+              onEditDatabase={handleEditDatabase}
               onDeleteDatabase={handleDeleteDatabase}
               onDeleteTable={handleDeleteTable}
             />
@@ -152,6 +214,22 @@ const Index = () => {
               isOpen={createDatabaseOpen}
               onClose={() => setCreateDatabaseOpen(false)}
               onCreateDatabase={handleCreateDatabaseSubmit}
+            />
+
+            <CreateTableDialog
+              isOpen={createTableOpen}
+              onClose={() => setCreateTableOpen(false)}
+              onCreateTable={handleCreateTableSubmit}
+            />
+
+            <EditDatabaseDialog
+              isOpen={editDatabaseOpen}
+              onClose={() => {
+                setEditDatabaseOpen(false);
+                setEditingDatabase(null);
+              }}
+              onEditDatabase={handleEditDatabaseSubmit}
+              currentName={editingDatabase?.name || ''}
             />
           </div>
         </SidebarProvider>

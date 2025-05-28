@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Database, 
@@ -55,6 +56,7 @@ interface DatabaseSidebarProps {
   onSelectTable: (id: string) => void;
   onCreateDatabase: () => void;
   onCreateTable: () => void;
+  onEditDatabase: (id: string) => void;
   onDeleteDatabase: (id: string) => void;
   onDeleteTable: (id: string) => void;
 }
@@ -67,6 +69,7 @@ export function DatabaseSidebar({
   onSelectTable,
   onCreateDatabase,
   onCreateTable,
+  onEditDatabase,
   onDeleteDatabase,
   onDeleteTable,
 }: DatabaseSidebarProps) {
@@ -81,9 +84,19 @@ export function DatabaseSidebar({
   return (
     <Sidebar className="border-r border-border">
       <SidebarHeader className="px-4 py-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Database className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">Database Manager</h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-bold">Database Manager</h1>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="h-8 w-8 p-0"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -125,6 +138,10 @@ export function DatabaseSidebar({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border border-border">
+                          <DropdownMenuItem onClick={() => onEditDatabase(database.id)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Database
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => onDeleteDatabase(database.id)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete Database
@@ -170,23 +187,14 @@ export function DatabaseSidebar({
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline">
-              <Import className="h-4 w-4 mr-2" />
-              Import
-            </Button>
-            <Button size="sm" variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="flex-1">
+            <Import className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1">
+            <Download className="h-4 w-4 mr-2" />
+            Export
           </Button>
         </div>
       </SidebarFooter>
