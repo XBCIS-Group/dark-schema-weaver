@@ -5,19 +5,38 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { DatabaseSidebar } from '@/components/DatabaseSidebar';
 import { TableView } from '@/components/TableView';
 import { SchemaEditor } from '@/components/SchemaEditor';
+import { CreateDatabaseDialog } from '@/components/CreateDatabaseDialog';
 import { useToast } from '@/hooks/use-toast';
 
+interface Database {
+  id: string;
+  name: string;
+  tables: any[];
+}
+
 const Index = () => {
-  const [databases, setDatabases] = useState([]);
+  const [databases, setDatabases] = useState<Database[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [schemaEditorOpen, setSchemaEditorOpen] = useState(false);
+  const [createDatabaseOpen, setCreateDatabaseOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCreateDatabase = () => {
+    setCreateDatabaseOpen(true);
+  };
+
+  const handleCreateDatabaseSubmit = (name: string) => {
+    const newDatabase: Database = {
+      id: Date.now().toString(),
+      name,
+      tables: [],
+    };
+    
+    setDatabases(prev => [...prev, newDatabase]);
     toast({
-      title: "Create Database",
-      description: "Database creation functionality would be implemented here.",
+      title: "Database Created",
+      description: `Database "${name}" has been created successfully.`,
     });
   };
 
@@ -29,11 +48,19 @@ const Index = () => {
   };
 
   const handleDeleteDatabase = (id: string) => {
-    toast({
-      title: "Delete Database",
-      description: "Database deletion functionality would be implemented here.",
-      variant: "destructive",
-    });
+    const database = databases.find(db => db.id === id);
+    if (database) {
+      setDatabases(prev => prev.filter(db => db.id !== id));
+      if (selectedDatabase === id) {
+        setSelectedDatabase(null);
+        setSelectedTable(null);
+      }
+      toast({
+        title: "Database Deleted",
+        description: `Database "${database.name}" has been deleted.`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteTable = (id: string) => {
@@ -119,6 +146,12 @@ const Index = () => {
               tableName=""
               columns={[]}
               onSave={handleSaveSchema}
+            />
+
+            <CreateDatabaseDialog
+              isOpen={createDatabaseOpen}
+              onClose={() => setCreateDatabaseOpen(false)}
+              onCreateDatabase={handleCreateDatabaseSubmit}
             />
           </div>
         </SidebarProvider>
