@@ -27,6 +27,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { createFileInput, readFile, parseCSV, csvToTable, tableToCSV, downloadFile } from '@/utils/fileUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface Column {
   id: string;
@@ -50,8 +52,8 @@ interface TableViewProps {
   onAddRow: () => void;
   onEditRow: (rowData: any) => void;
   onDeleteRow: (rowData: any) => void;
-  onImportData: () => void;
-  onExportData: () => void;
+  onImportTable: (tableData: TableData) => void;
+  onUpdateTable: (tableData: TableData) => void;
 }
 
 export function TableView({
@@ -60,10 +62,55 @@ export function TableView({
   onAddRow,
   onEditRow,
   onDeleteRow,
-  onImportData,
-  onExportData,
+  onImportTable,
+  onUpdateTable,
 }: TableViewProps) {
   const [filter, setFilter] = useState('');
+  const { toast } = useToast();
+
+  const handleImportTable = async () => {
+    try {
+      const file = await createFileInput('.csv');
+      if (!file) return;
+
+      const csvText = await readFile(file);
+      const { headers, rows } = parseCSV(csvText);
+      
+      const tableName = file.name.replace('.csv', '');
+      const newTable = csvToTable(headers, rows, tableName);
+      
+      onImportTable(newTable);
+      toast({
+        title: "Table Imported",
+        description: `Successfully imported ${rows.length} rows from ${file.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "Failed to import CSV file. Please check the file format.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportTable = () => {
+    if (!table) return;
+
+    try {
+      const csvData = tableToCSV(table);
+      downloadFile(csvData, `${table.name}.csv`, 'text/csv');
+      toast({
+        title: "Table Exported",
+        description: `Successfully exported ${table.name} as CSV`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export table data.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!table) {
     return (
@@ -71,9 +118,13 @@ export function TableView({
         <div className="text-center">
           <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-medium mb-2">No Table Selected</h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Select a table from the sidebar to view its data and schema
           </p>
+          <Button onClick={handleImportTable}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import CSV File
+          </Button>
         </div>
       </div>
     );
@@ -97,13 +148,13 @@ export function TableView({
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onImportData}>
+            <Button variant="outline" onClick={handleImportTable}>
               <Upload className="h-4 w-4 mr-2" />
-              Import
+              Import CSV
             </Button>
-            <Button variant="outline" onClick={onExportData}>
+            <Button variant="outline" onClick={handleExportTable}>
               <Download className="h-4 w-4 mr-2" />
-              Export
+              Export CSV
             </Button>
             <Button variant="outline" onClick={onEditSchema}>
               <Settings className="h-4 w-4 mr-2" />

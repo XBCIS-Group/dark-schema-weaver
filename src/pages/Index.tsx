@@ -8,9 +8,11 @@ import { SchemaEditor } from '@/components/SchemaEditor';
 import { CreateDatabaseDialog } from '@/components/CreateDatabaseDialog';
 import { CreateTableDialog } from '@/components/CreateTableDialog';
 import { EditDatabaseDialog } from '@/components/EditDatabaseDialog';
+import { AddRowDialog } from '@/components/AddRowDialog';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon } from 'lucide-react';
+import { createFileInput, readFile, downloadFile } from '@/utils/fileUtils';
 
 interface Column {
   id: string;
@@ -57,6 +59,7 @@ const Index = () => {
   const [createDatabaseOpen, setCreateDatabaseOpen] = useState(false);
   const [createTableOpen, setCreateTableOpen] = useState(false);
   const [editDatabaseOpen, setEditDatabaseOpen] = useState(false);
+  const [addRowOpen, setAddRowOpen] = useState(false);
   const [editingDatabase, setEditingDatabase] = useState<Database | null>(null);
   const { toast } = useToast();
 
@@ -76,6 +79,63 @@ const Index = () => {
       title: "Database Created",
       description: `Database "${name}" has been created successfully.`,
     });
+  };
+
+  const handleImportDatabase = async () => {
+    try {
+      const file = await createFileInput('.json');
+      if (!file) return;
+
+      const jsonText = await readFile(file);
+      const importedData = JSON.parse(jsonText);
+      
+      const newDatabase: Database = {
+        id: Date.now().toString(),
+        name: importedData.name || file.name.replace('.json', ''),
+        tables: importedData.tables || [],
+      };
+
+      setDatabases(prev => [...prev, newDatabase]);
+      toast({
+        title: "Database Imported",
+        description: `Successfully imported database from ${file.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "Failed to import database. Please check the file format.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportDatabase = () => {
+    if (!selectedDatabase) {
+      toast({
+        title: "No Database Selected",
+        description: "Please select a database to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const database = databases.find(db => db.id === selectedDatabase);
+    if (!database) return;
+
+    try {
+      const jsonData = JSON.stringify(database, null, 2);
+      downloadFile(jsonData, `${database.name}.json`, 'application/json');
+      toast({
+        title: "Database Exported",
+        description: `Successfully exported ${database.name} as JSON`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export database.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCreateTable = () => {
@@ -109,6 +169,64 @@ const Index = () => {
     toast({
       title: "Table Created",
       description: `Table "${name}" has been created successfully.`,
+    });
+  };
+
+  const handleImportTable = (tableData: Table) => {
+    if (!selectedDatabase) {
+      toast({
+        title: "No Database Selected",
+        description: "Please select a database first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? { ...db, tables: [...db.tables, tableData] }
+        : db
+    ));
+  };
+
+  const handleUpdateTable = (updatedTable: Table) => {
+    if (!selectedDatabase) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? { 
+            ...db, 
+            tables: db.tables.map(table => 
+              table.id === updatedTable.id ? updatedTable : table
+            )
+          }
+        : db
+    ));
+  };
+
+  const handleAddRow = () => {
+    setAddRowOpen(true);
+  };
+
+  const handleAddRowSubmit = (rowData: Record<string, any>) => {
+    if (!selectedDatabase || !selectedTable) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? {
+            ...db,
+            tables: db.tables.map(table => 
+              table.id === selectedTable
+                ? { ...table, rows: [...table.rows, rowData] }
+                : table
+            )
+          }
+        : db
+    ));
+
+    toast({
+      title: "Row Added",
+      description: "New row has been added successfully.",
     });
   };
 
@@ -166,20 +284,6 @@ const Index = () => {
     });
   };
 
-  const handleImportData = () => {
-    toast({
-      title: "Import Data",
-      description: "Data import functionality would be implemented here.",
-    });
-  };
-
-  const handleExportData = () => {
-    toast({
-      title: "Export Data",
-      description: "Data export functionality would be implemented here.",
-    });
-  };
-
   const handleEditRow = (rowData: any) => {
     toast({
       title: "Edit Row",
@@ -218,6 +322,8 @@ const Index = () => {
               onEditDatabase={handleEditDatabase}
               onDeleteDatabase={handleDeleteDatabase}
               onDeleteTable={handleDeleteTable}
+              onImportDatabase={handleImportDatabase}
+              onExportDatabase={handleExportDatabase}
             />
             <main className="flex-1 flex flex-col">
               <div className="border-b border-border p-4 bg-card flex items-center justify-between">
@@ -227,11 +333,11 @@ const Index = () => {
               <TableView
                 table={currentTable}
                 onEditSchema={() => setSchemaEditorOpen(true)}
-                onAddRow={() => toast({ title: "Add Row", description: "Row addition form would open here." })}
+                onAddRow={handleAddRow}
                 onEditRow={handleEditRow}
                 onDeleteRow={handleDeleteRow}
-                onImportData={handleImportData}
-                onExportData={handleExportData}
+                onImportTable={handleImportTable}
+                onUpdateTable={handleUpdateTable}
               />
             </main>
 
@@ -263,6 +369,14 @@ const Index = () => {
               }}
               onEditDatabase={handleEditDatabaseSubmit}
               currentName={editingDatabase?.name || ''}
+            />
+
+            <AddRowDialog
+              isOpen={addRowOpen}
+              onClose={() => setAddRowOpen(false)}
+              onAddRow={handleAddRowSubmit}
+              columns={currentTable?.columns || []}
+              tableName={currentTable?.name || ""}
             />
           </div>
         </SidebarProvider>

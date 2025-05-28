@@ -65,6 +65,8 @@ interface DatabaseSidebarProps {
   onEditDatabase: (id: string) => void;
   onDeleteDatabase: (id: string) => void;
   onDeleteTable: (id: string) => void;
+  onImportDatabase: () => void;
+  onExportDatabase: () => void;
 }
 
 export function DatabaseSidebar({
@@ -78,6 +80,8 @@ export function DatabaseSidebar({
   onEditDatabase,
   onDeleteDatabase,
   onDeleteTable,
+  onImportDatabase,
+  onExportDatabase,
 }: DatabaseSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -183,11 +187,11 @@ export function DatabaseSidebar({
 
       <SidebarFooter className="p-4">
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" className="flex-1">
+          <Button size="sm" variant="outline" className="flex-1" onClick={onImportDatabase}>
             <Import className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <Button size="sm" variant="outline" className="flex-1">
+          <Button size="sm" variant="outline" className="flex-1" onClick={onExportDatabase}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
