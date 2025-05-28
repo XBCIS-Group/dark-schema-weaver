@@ -39,12 +39,31 @@ export function useRowOperations({
     });
   };
 
-  const handleEditRow = (rowData: any) => {
+  const handleEditRow = (updatedRowData: Record<string, any>) => {
+    if (!selectedDatabase || !selectedTable) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? {
+            ...db,
+            tables: db.tables.map(table => 
+              table.id === selectedTable
+                ? { 
+                    ...table, 
+                    rows: table.rows.map(row => 
+                      row.id === updatedRowData.id ? updatedRowData : row
+                    )
+                  }
+                : table
+            )
+          }
+        : db
+    ));
+
     toast({
-      title: "Edit Row",
-      description: `Edit row with ID: ${rowData.id || 'unknown'}`,
+      title: "Row Updated",
+      description: "Row has been updated successfully.",
     });
-    console.log('Edit row data:', rowData);
   };
 
   const handleDeleteRow = (rowData: any) => {

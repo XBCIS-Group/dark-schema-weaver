@@ -1,11 +1,6 @@
-import { useState } from 'react';
-import { Table } from '@/types/database';
 
-interface Database {
-  id: string;
-  name: string;
-  tables: any[];
-}
+import { useState } from 'react';
+import { Database, Table } from '@/types/database';
 
 export function useDialogState() {
   const [schemaEditorOpen, setSchemaEditorOpen] = useState(false);
@@ -14,8 +9,10 @@ export function useDialogState() {
   const [editDatabaseOpen, setEditDatabaseOpen] = useState(false);
   const [editTableOpen, setEditTableOpen] = useState(false);
   const [addRowOpen, setAddRowOpen] = useState(false);
+  const [editRowOpen, setEditRowOpen] = useState(false);
   const [editingDatabase, setEditingDatabase] = useState<Database | null>(null);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
+  const [editingRowData, setEditingRowData] = useState<Record<string, any> | null>(null);
 
   const openCreateDatabase = () => setCreateDatabaseOpen(true);
   const closeCreateDatabase = () => setCreateDatabaseOpen(false);
@@ -27,7 +24,6 @@ export function useDialogState() {
     setEditingDatabase(database);
     setEditDatabaseOpen(true);
   };
-
   const closeEditDatabase = () => {
     setEditDatabaseOpen(false);
     setEditingDatabase(null);
@@ -37,7 +33,6 @@ export function useDialogState() {
     setEditingTable(table);
     setEditTableOpen(true);
   };
-
   const closeEditTable = () => {
     setEditTableOpen(false);
     setEditingTable(null);
@@ -45,6 +40,15 @@ export function useDialogState() {
 
   const openAddRow = () => setAddRowOpen(true);
   const closeAddRow = () => setAddRowOpen(false);
+
+  const openEditRow = (rowData: Record<string, any>) => {
+    setEditingRowData(rowData);
+    setEditRowOpen(true);
+  };
+  const closeEditRow = () => {
+    setEditRowOpen(false);
+    setEditingRowData(null);
+  };
 
   const openSchemaEditor = () => setSchemaEditorOpen(true);
   const closeSchemaEditor = () => setSchemaEditorOpen(false);
@@ -56,8 +60,10 @@ export function useDialogState() {
     editDatabaseOpen,
     editTableOpen,
     addRowOpen,
+    editRowOpen,
     editingDatabase,
     editingTable,
+    editingRowData,
     openCreateDatabase,
     closeCreateDatabase,
     openCreateTable,
@@ -68,6 +74,8 @@ export function useDialogState() {
     closeEditTable,
     openAddRow,
     closeAddRow,
+    openEditRow,
+    closeEditRow,
     openSchemaEditor,
     closeSchemaEditor,
   };

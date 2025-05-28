@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -9,6 +10,7 @@ import { CreateTableDialog } from '@/components/CreateTableDialog';
 import { EditDatabaseDialog } from '@/components/EditDatabaseDialog';
 import { EditTableDialog } from '@/components/EditTableDialog';
 import { AddRowDialog } from '@/components/AddRowDialog';
+import { EditRowDialog } from '@/components/EditRowDialog';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useDatabaseOperations } from '@/hooks/useDatabaseOperations';
 import { useTableOperations } from '@/hooks/useTableOperations';
@@ -54,8 +56,10 @@ const Index = () => {
     editDatabaseOpen,
     editTableOpen,
     addRowOpen,
+    editRowOpen,
     editingDatabase,
     editingTable,
+    editingRowData,
     openCreateDatabase,
     closeCreateDatabase,
     openCreateTable,
@@ -66,6 +70,8 @@ const Index = () => {
     closeEditTable,
     openAddRow,
     closeAddRow,
+    openEditRow,
+    closeEditRow,
     openSchemaEditor,
     closeSchemaEditor,
   } = useDialogState();
@@ -91,6 +97,10 @@ const Index = () => {
 
   const handleEditTableSubmit = (name: string) => {
     handleEditTable(name, editingTable);
+  };
+
+  const handleEditRowClick = (rowData: Record<string, any>) => {
+    openEditRow(rowData);
   };
 
   // Get the currently selected table data
@@ -130,7 +140,7 @@ const Index = () => {
                 table={currentTable}
                 onEditSchema={openSchemaEditor}
                 onAddRow={openAddRow}
-                onEditRow={handleEditRow}
+                onEditRow={handleEditRowClick}
                 onDeleteRow={handleDeleteRow}
                 onImportTable={handleImportTable}
                 onUpdateTable={handleUpdateTable}
@@ -176,6 +186,15 @@ const Index = () => {
               onClose={closeAddRow}
               onAddRow={handleAddRow}
               columns={currentTable?.columns || []}
+              tableName={currentTable?.name || ""}
+            />
+
+            <EditRowDialog
+              isOpen={editRowOpen}
+              onClose={closeEditRow}
+              onEditRow={handleEditRow}
+              columns={currentTable?.columns || []}
+              rowData={editingRowData}
               tableName={currentTable?.name || ""}
             />
           </div>
