@@ -63,6 +63,7 @@ interface DatabaseSidebarProps {
   onCreateDatabase: () => void;
   onCreateTable: () => void;
   onEditDatabase: (id: string) => void;
+  onEditTable: (id: string) => void;
   onDeleteDatabase: (id: string) => void;
   onDeleteTable: (id: string) => void;
   onImportDatabase: () => void;
@@ -78,6 +79,7 @@ export function DatabaseSidebar({
   onCreateDatabase,
   onCreateTable,
   onEditDatabase,
+  onEditTable,
   onDeleteDatabase,
   onDeleteTable,
   onImportDatabase,
@@ -205,6 +207,10 @@ export function DatabaseSidebar({
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-popover border border-border">
+                                  <DropdownMenuItem onClick={() => onEditTable(table.id)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit Table
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem 
                                     onClick={() => onDeleteTable(table.id)}
                                     className="text-destructive"
