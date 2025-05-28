@@ -1,4 +1,3 @@
-
 import { useToast } from '@/hooks/use-toast';
 
 interface Column {
@@ -192,7 +191,22 @@ export function useTableOperations({
     });
   };
 
-  const handleSaveSchema = (tableName: string, columns: any[]) => {
+  const handleSaveSchema = (tableName: string, columns: Column[]) => {
+    if (!selectedDatabase || !selectedTable) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? {
+            ...db,
+            tables: db.tables.map(table => 
+              table.id === selectedTable
+                ? { ...table, columns: columns, name: tableName }
+                : table
+            )
+          }
+        : db
+    ));
+
     toast({
       title: "Schema Updated",
       description: `Schema for table "${tableName}" has been updated successfully.`,

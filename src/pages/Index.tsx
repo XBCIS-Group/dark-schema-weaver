@@ -81,6 +81,9 @@ const Index = () => {
     databases.find(db => db.id === selectedDatabase)?.tables.find(t => t.id === selectedTable) || null 
     : null;
 
+  console.log('Current table:', currentTable);
+  console.log('Current table columns:', currentTable?.columns);
+
   return (
     <ThemeProvider defaultTheme="dark" storageKey="dbms-ui-theme">
       <div className="min-h-screen bg-background text-foreground">
@@ -120,7 +123,7 @@ const Index = () => {
               isOpen={schemaEditorOpen}
               onClose={closeSchemaEditor}
               tableName={currentTable?.name || ""}
-              columns={[]}
+              columns={currentTable?.columns || []}
               onSave={handleSaveSchema}
             />
 
