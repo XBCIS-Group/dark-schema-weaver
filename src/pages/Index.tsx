@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/components/ThemeProvider';
 import { DatabaseSidebar } from '@/components/DatabaseSidebar';
 import { TableView } from '@/components/TableView';
 import { SchemaEditor } from '@/components/SchemaEditor';
@@ -8,6 +8,8 @@ import { CreateDatabaseDialog } from '@/components/CreateDatabaseDialog';
 import { CreateTableDialog } from '@/components/CreateTableDialog';
 import { EditDatabaseDialog } from '@/components/EditDatabaseDialog';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Sun, Moon } from 'lucide-react';
 
 interface Table {
   id: string;
@@ -20,6 +22,21 @@ interface Database {
   id: string;
   name: string;
   tables: Table[];
+}
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="h-8 w-8 p-0"
+    >
+      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </Button>
+  );
 }
 
 const Index = () => {
@@ -170,6 +187,11 @@ const Index = () => {
     console.log('Delete row data:', rowData);
   };
 
+  // Get the currently selected table data
+  const currentTable = selectedTable ? 
+    databases.find(db => db.id === selectedDatabase)?.tables.find(t => t.id === selectedTable) || null 
+    : null;
+
   return (
     <ThemeProvider defaultTheme="dark" storageKey="dbms-ui-theme">
       <div className="min-h-screen bg-background text-foreground">
@@ -188,11 +210,12 @@ const Index = () => {
               onDeleteTable={handleDeleteTable}
             />
             <main className="flex-1 flex flex-col">
-              <div className="border-b border-border p-4 bg-card">
+              <div className="border-b border-border p-4 bg-card flex items-center justify-between">
                 <SidebarTrigger />
+                <ThemeToggle />
               </div>
               <TableView
-                table={null}
+                table={currentTable}
                 onEditSchema={() => setSchemaEditorOpen(true)}
                 onAddRow={() => toast({ title: "Add Row", description: "Row addition form would open here." })}
                 onEditRow={handleEditRow}
@@ -205,7 +228,7 @@ const Index = () => {
             <SchemaEditor
               isOpen={schemaEditorOpen}
               onClose={() => setSchemaEditorOpen(false)}
-              tableName=""
+              tableName={currentTable?.name || ""}
               columns={[]}
               onSave={handleSaveSchema}
             />
