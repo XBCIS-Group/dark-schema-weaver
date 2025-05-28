@@ -17,15 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-}
+import { Column } from '@/types/database';
 
 interface DataTableProps {
   columns: Column[];

@@ -5,22 +5,7 @@ import { SchemaOverview } from '@/components/SchemaOverview';
 import { DataTable } from '@/components/DataTable';
 import { EmptyTableState } from '@/components/EmptyTableState';
 import { useTableView } from '@/hooks/useTableView';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-}
-
-interface TableData {
-  id: string;
-  name: string;
-  columns: Column[];
-  rows: Record<string, any>[];
-}
+import { Column, Table as TableData } from '@/types/database';
 
 interface TableViewProps {
   table: TableData | null;

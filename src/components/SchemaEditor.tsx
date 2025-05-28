@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Plus, 
@@ -38,16 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-  defaultValue?: string;
-}
+import { Column } from '@/types/database';
 
 interface SchemaEditorProps {
   isOpen: boolean;
@@ -247,9 +237,9 @@ export function SchemaEditor({
                       </TableCell>
                       <TableCell>
                         <Input
-                          value={column.defaultValue || ''}
+                          value={(column as any).defaultValue || ''}
                           onChange={(e) => 
-                            updateColumn(column.id, { defaultValue: e.target.value })
+                            updateColumn(column.id, { defaultValue: e.target.value } as any)
                           }
                           placeholder="Default value"
                           className="text-sm"
