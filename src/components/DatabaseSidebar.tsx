@@ -189,9 +189,32 @@ export function DatabaseSidebar({
                               <Table className="h-3 w-3" />
                               <span className="text-sm">{table.name}</span>
                             </div>
-                            <span className="text-xs text-muted-foreground">
-                              {table.rows.length}
-                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground">
+                                {table.rows.length}
+                              </span>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-4 w-4 p-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Settings className="h-2 w-2" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-popover border border-border">
+                                  <DropdownMenuItem 
+                                    onClick={() => onDeleteTable(table.id)}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Table
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}

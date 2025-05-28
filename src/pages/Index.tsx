@@ -42,7 +42,8 @@ const Index = () => {
     databases, 
     setDatabases, 
     selectedDatabase, 
-    selectedTable 
+    selectedTable,
+    setSelectedTable
   });
 
   const {

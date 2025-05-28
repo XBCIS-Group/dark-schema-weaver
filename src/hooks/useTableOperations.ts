@@ -28,13 +28,15 @@ interface UseTableOperationsProps {
   setDatabases: React.Dispatch<React.SetStateAction<Database[]>>;
   selectedDatabase: string | null;
   selectedTable: string | null;
+  setSelectedTable: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export function useTableOperations({ 
   databases, 
   setDatabases, 
   selectedDatabase, 
-  selectedTable 
+  selectedTable,
+  setSelectedTable
 }: UseTableOperationsProps) {
   const { toast } = useToast();
 
@@ -51,7 +53,16 @@ export function useTableOperations({
     const newTable: Table = {
       id: Date.now().toString(),
       name,
-      columns: [],
+      columns: [
+        {
+          id: 'id',
+          name: 'id',
+          type: 'INTEGER',
+          nullable: false,
+          primaryKey: true,
+          unique: true,
+        }
+      ],
       rows: [],
     };
 
@@ -121,10 +132,28 @@ export function useTableOperations({
     });
   };
 
-  const handleDeleteTable = (id: string) => {
+  const handleDeleteTable = (tableId: string) => {
+    if (!selectedDatabase) return;
+
+    const database = databases.find(db => db.id === selectedDatabase);
+    const table = database?.tables.find(t => t.id === tableId);
+    
+    if (!table) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? { ...db, tables: db.tables.filter(t => t.id !== tableId) }
+        : db
+    ));
+
+    // Clear selected table if it was the one being deleted
+    if (selectedTable === tableId) {
+      setSelectedTable(null);
+    }
+
     toast({
-      title: "Delete Table",
-      description: "Table deletion functionality would be implemented here.",
+      title: "Table Deleted",
+      description: `Table "${table.name}" has been deleted successfully.`,
       variant: "destructive",
     });
   };
@@ -138,12 +167,29 @@ export function useTableOperations({
   };
 
   const handleDeleteRow = (rowData: any) => {
+    if (!selectedDatabase || !selectedTable) return;
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? {
+            ...db,
+            tables: db.tables.map(table => 
+              table.id === selectedTable
+                ? { 
+                    ...table, 
+                    rows: table.rows.filter(row => row.id !== rowData.id) 
+                  }
+                : table
+            )
+          }
+        : db
+    ));
+
     toast({
-      title: "Delete Row",
-      description: `Row with ID ${rowData.id || 'unknown'} would be deleted.`,
+      title: "Row Deleted",
+      description: `Row has been deleted successfully.`,
       variant: "destructive",
     });
-    console.log('Delete row data:', rowData);
   };
 
   const handleSaveSchema = (tableName: string, columns: any[]) => {
