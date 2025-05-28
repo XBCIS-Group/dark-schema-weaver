@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { createFileInput, readFile, downloadFile } from '@/utils/fileUtils';
+import { createFileInput, readFile } from '@/utils/fileUtils';
 
 interface Column {
   id: string;
@@ -73,7 +73,7 @@ export function useDatabaseOperations() {
     }
   };
 
-  const handleExportDatabase = () => {
+  const handleExportDatabase = async () => {
     if (!selectedDatabase) {
       toast({
         title: "No Database Selected",
@@ -87,18 +87,55 @@ export function useDatabaseOperations() {
     if (!database) return;
 
     try {
-      const jsonData = JSON.stringify(database, null, 2);
-      downloadFile(jsonData, `${database.name}.json`, 'application/json');
-      toast({
-        title: "Database Exported",
-        description: `Successfully exported ${database.name} as JSON`,
-      });
+      // Create a file handle using the File System Access API
+      if ('showSaveFilePicker' in window) {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: `${database.name}.json`,
+          types: [
+            {
+              description: 'JSON files',
+              accept: {
+                'application/json': ['.json'],
+              },
+            },
+          ],
+        });
+
+        const writable = await fileHandle.createWritable();
+        const jsonData = JSON.stringify(database, null, 2);
+        await writable.write(jsonData);
+        await writable.close();
+
+        toast({
+          title: "Database Exported",
+          description: `Successfully exported ${database.name} to your chosen location`,
+        });
+      } else {
+        // Fallback for browsers that don't support File System Access API
+        const jsonData = JSON.stringify(database, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${database.name}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "Database Exported",
+          description: `Successfully exported ${database.name} as JSON`,
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export database.",
-        variant: "destructive",
-      });
+      if ((error as Error).name !== 'AbortError') {
+        toast({
+          title: "Export Failed",
+          description: "Failed to export database.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

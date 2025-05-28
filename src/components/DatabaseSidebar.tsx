@@ -84,11 +84,25 @@ export function DatabaseSidebar({
   onExportDatabase,
 }: DatabaseSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedDatabases, setExpandedDatabases] = useState<Set<string>>(new Set());
 
   const filteredDatabases = databases.filter(db =>
     db.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     db.tables.some(table => table.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleDatabaseClick = (databaseId: string) => {
+    setExpandedDatabases(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(databaseId)) {
+        newExpanded.delete(databaseId);
+      } else {
+        newExpanded.add(databaseId);
+      }
+      return newExpanded;
+    });
+    onSelectDatabase(databaseId);
+  };
 
   return (
     <Sidebar className="border-r border-border">
@@ -122,7 +136,7 @@ export function DatabaseSidebar({
                 <div key={database.id}>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      onClick={() => onSelectDatabase(database.id)}
+                      onClick={() => handleDatabaseClick(database.id)}
                       isActive={selectedDatabase === database.id}
                       className="flex items-center justify-between"
                     >
@@ -132,7 +146,12 @@ export function DatabaseSidebar({
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Settings className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -150,7 +169,7 @@ export function DatabaseSidebar({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
-                  {selectedDatabase === database.id && (
+                  {expandedDatabases.has(database.id) && (
                     <div className="ml-4 mt-2 space-y-1">
                       <div className="flex items-center justify-between px-2">
                         <span className="text-xs text-muted-foreground">Tables</span>

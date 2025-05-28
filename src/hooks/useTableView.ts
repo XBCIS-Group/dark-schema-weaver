@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { createFileInput, readFile, parseCSV, csvToTable, tableToCSV, downloadFile } from '@/utils/fileUtils';
+import { createFileInput, readFile, parseCSV, csvToTable, tableToCSV } from '@/utils/fileUtils';
 
 interface Column {
   id: string;
@@ -51,22 +51,59 @@ export function useTableView(
     }
   };
 
-  const handleExportTable = () => {
+  const handleExportTable = async () => {
     if (!table) return;
 
     try {
       const csvData = tableToCSV(table);
-      downloadFile(csvData, `${table.name}.csv`, 'text/csv');
-      toast({
-        title: "Table Exported",
-        description: `Successfully exported ${table.name} as CSV`,
-      });
+      
+      // Create a file handle using the File System Access API
+      if ('showSaveFilePicker' in window) {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: `${table.name}.csv`,
+          types: [
+            {
+              description: 'CSV files',
+              accept: {
+                'text/csv': ['.csv'],
+              },
+            },
+          ],
+        });
+
+        const writable = await fileHandle.createWritable();
+        await writable.write(csvData);
+        await writable.close();
+
+        toast({
+          title: "Table Exported",
+          description: `Successfully exported ${table.name} to your chosen location`,
+        });
+      } else {
+        // Fallback for browsers that don't support File System Access API
+        const blob = new Blob([csvData], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${table.name}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "Table Exported",
+          description: `Successfully exported ${table.name} as CSV`,
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export table data.",
-        variant: "destructive",
-      });
+      if ((error as Error).name !== 'AbortError') {
+        toast({
+          title: "Export Failed",
+          description: "Failed to export table data.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
