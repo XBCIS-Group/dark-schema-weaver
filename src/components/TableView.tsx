@@ -48,8 +48,8 @@ interface TableViewProps {
   table: TableData | null;
   onEditSchema: () => void;
   onAddRow: () => void;
-  onEditRow: (rowId: string) => void;
-  onDeleteRow: (rowId: string) => void;
+  onEditRow: (rowData: any) => void;
+  onDeleteRow: (rowData: any) => void;
   onImportData: () => void;
   onExportData: () => void;
 }
@@ -188,12 +188,12 @@ export function TableView({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-popover border border-border">
-                      <DropdownMenuItem onClick={() => onEditRow(String(index))}>
+                      <DropdownMenuItem onClick={() => onEditRow(row)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => onDeleteRow(String(index))}
+                        onClick={() => onDeleteRow(row)}
                         className="text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
