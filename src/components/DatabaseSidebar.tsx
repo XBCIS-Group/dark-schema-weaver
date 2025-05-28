@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Database, 
@@ -6,7 +5,7 @@ import {
   Plus, 
   Settings, 
   Import, 
-  Export,
+  Download,
   Trash2,
   Edit,
   Search,
@@ -178,7 +177,7 @@ export function DatabaseSidebar({
               Import
             </Button>
             <Button size="sm" variant="outline">
-              <Export className="h-4 w-4 mr-2" />
+              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
