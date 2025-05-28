@@ -23,6 +23,7 @@ export function useTableOperations({
     handleCreateTable,
     handleImportTable,
     handleUpdateTable,
+    handleEditTable,
     handleDeleteTable,
   } = useTableManagement({ 
     databases, 
@@ -56,6 +57,7 @@ export function useTableOperations({
     handleCreateTable,
     handleImportTable,
     handleUpdateTable,
+    handleEditTable,
     handleAddRow,
     handleDeleteTable,
     handleEditRow,

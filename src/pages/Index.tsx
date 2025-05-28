@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -8,6 +7,7 @@ import { SchemaEditor } from '@/components/SchemaEditor';
 import { CreateDatabaseDialog } from '@/components/CreateDatabaseDialog';
 import { CreateTableDialog } from '@/components/CreateTableDialog';
 import { EditDatabaseDialog } from '@/components/EditDatabaseDialog';
+import { EditTableDialog } from '@/components/EditTableDialog';
 import { AddRowDialog } from '@/components/AddRowDialog';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useDatabaseOperations } from '@/hooks/useDatabaseOperations';
@@ -33,6 +33,7 @@ const Index = () => {
     handleCreateTable,
     handleImportTable,
     handleUpdateTable,
+    handleEditTable,
     handleAddRow,
     handleDeleteTable,
     handleEditRow,
@@ -51,14 +52,18 @@ const Index = () => {
     createDatabaseOpen,
     createTableOpen,
     editDatabaseOpen,
+    editTableOpen,
     addRowOpen,
     editingDatabase,
+    editingTable,
     openCreateDatabase,
     closeCreateDatabase,
     openCreateTable,
     closeCreateTable,
     openEditDatabase,
     closeEditDatabase,
+    openEditTable,
+    closeEditTable,
     openAddRow,
     closeAddRow,
     openSchemaEditor,
@@ -74,6 +79,18 @@ const Index = () => {
 
   const handleEditDatabaseSubmit = (name: string) => {
     handleEditDatabase(name, editingDatabase);
+  };
+
+  const handleEditTableClick = (id: string) => {
+    const database = databases.find(db => db.id === selectedDatabase);
+    const table = database?.tables.find(t => t.id === id);
+    if (table) {
+      openEditTable(table);
+    }
+  };
+
+  const handleEditTableSubmit = (name: string) => {
+    handleEditTable(name, editingTable);
   };
 
   // Get the currently selected table data
@@ -98,6 +115,7 @@ const Index = () => {
               onCreateDatabase={openCreateDatabase}
               onCreateTable={openCreateTable}
               onEditDatabase={handleEditDatabaseClick}
+              onEditTable={handleEditTableClick}
               onDeleteDatabase={handleDeleteDatabase}
               onDeleteTable={handleDeleteTable}
               onImportDatabase={handleImportDatabase}
@@ -144,6 +162,13 @@ const Index = () => {
               onClose={closeEditDatabase}
               onEditDatabase={handleEditDatabaseSubmit}
               currentName={editingDatabase?.name || ''}
+            />
+
+            <EditTableDialog
+              isOpen={editTableOpen}
+              onClose={closeEditTable}
+              onEditTable={handleEditTableSubmit}
+              currentName={editingTable?.name || ''}
             />
 
             <AddRowDialog

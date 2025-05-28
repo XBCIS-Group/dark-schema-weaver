@@ -1,4 +1,3 @@
-
 import { useToast } from '@/hooks/use-toast';
 import { Table, Database } from '@/types/database';
 
@@ -89,6 +88,35 @@ export function useTableManagement({
     ));
   };
 
+  const handleEditTable = (name: string, editingTable: Table | null) => {
+    if (!selectedDatabase || !editingTable) {
+      toast({
+        title: "Error",
+        description: "Unable to edit table. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDatabases(prev => prev.map(db => 
+      db.id === selectedDatabase 
+        ? {
+            ...db,
+            tables: db.tables.map(table => 
+              table.id === editingTable.id 
+                ? { ...table, name }
+                : table
+            )
+          }
+        : db
+    ));
+
+    toast({
+      title: "Table Updated",
+      description: `Table renamed to "${name}" successfully.`,
+    });
+  };
+
   const handleDeleteTable = (tableId: string) => {
     if (!selectedDatabase) return;
 
@@ -119,6 +147,7 @@ export function useTableManagement({
     handleCreateTable,
     handleImportTable,
     handleUpdateTable,
+    handleEditTable,
     handleDeleteTable,
   };
 }

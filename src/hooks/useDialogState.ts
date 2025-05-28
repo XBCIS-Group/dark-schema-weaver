@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { Table } from '@/types/database';
 
 interface Database {
   id: string;
@@ -12,8 +12,10 @@ export function useDialogState() {
   const [createDatabaseOpen, setCreateDatabaseOpen] = useState(false);
   const [createTableOpen, setCreateTableOpen] = useState(false);
   const [editDatabaseOpen, setEditDatabaseOpen] = useState(false);
+  const [editTableOpen, setEditTableOpen] = useState(false);
   const [addRowOpen, setAddRowOpen] = useState(false);
   const [editingDatabase, setEditingDatabase] = useState<Database | null>(null);
+  const [editingTable, setEditingTable] = useState<Table | null>(null);
 
   const openCreateDatabase = () => setCreateDatabaseOpen(true);
   const closeCreateDatabase = () => setCreateDatabaseOpen(false);
@@ -31,6 +33,16 @@ export function useDialogState() {
     setEditingDatabase(null);
   };
 
+  const openEditTable = (table: Table) => {
+    setEditingTable(table);
+    setEditTableOpen(true);
+  };
+
+  const closeEditTable = () => {
+    setEditTableOpen(false);
+    setEditingTable(null);
+  };
+
   const openAddRow = () => setAddRowOpen(true);
   const closeAddRow = () => setAddRowOpen(false);
 
@@ -42,14 +54,18 @@ export function useDialogState() {
     createDatabaseOpen,
     createTableOpen,
     editDatabaseOpen,
+    editTableOpen,
     addRowOpen,
     editingDatabase,
+    editingTable,
     openCreateDatabase,
     closeCreateDatabase,
     openCreateTable,
     closeCreateTable,
     openEditDatabase,
     closeEditDatabase,
+    openEditTable,
+    closeEditTable,
     openAddRow,
     closeAddRow,
     openSchemaEditor,
