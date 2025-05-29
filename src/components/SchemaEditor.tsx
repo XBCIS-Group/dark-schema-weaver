@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -167,9 +166,6 @@ export function SchemaEditor({
                         <SelectItem value="decimal">Decimal</SelectItem>
                         <SelectItem value="boolean">Boolean</SelectItem>
                         <SelectItem value="date">Date</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="url">URL</SelectItem>
-                        <SelectItem value="json">JSON</SelectItem>
                         <SelectItem value="uuid">UUID</SelectItem>
                       </SelectContent>
                     </Select>
