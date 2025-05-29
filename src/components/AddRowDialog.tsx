@@ -40,7 +40,7 @@ export function AddRowDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Add New Row</DialogTitle>
           <DialogDescription>
@@ -53,26 +53,28 @@ export function AddRowDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 min-h-0 max-h-[400px]">
-          <div className="space-y-4 pr-4">
-            {editableColumns.map((column) => (
-              <FormField
-                key={column.id}
-                column={column}
-                value={rowData[column.name]}
-                onChange={(value) => handleInputChange(column.name, value)}
-                error={errors[column.name]}
-              />
-            ))}
-            {editableColumns.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No editable fields available. All columns are primary keys.
-              </p>
-            )}
-          </div>
-        </ScrollArea>
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full max-h-[50vh]">
+            <div className="space-y-4 pr-4 pb-2">
+              {editableColumns.map((column) => (
+                <FormField
+                  key={column.id}
+                  column={column}
+                  value={rowData[column.name]}
+                  onChange={(value) => handleInputChange(column.name, value)}
+                  error={errors[column.name]}
+                />
+              ))}
+              {editableColumns.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No editable fields available. All columns are primary keys.
+                </p>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
 
-        <DialogFooter className="flex-shrink-0">
+        <DialogFooter className="flex-shrink-0 mt-4">
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
