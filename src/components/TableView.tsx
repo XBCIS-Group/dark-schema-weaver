@@ -15,6 +15,7 @@ interface TableViewProps {
   onDeleteRow: (rowData: any) => void;
   onImportTable: (tableData: TableData) => void;
   onUpdateTable: (tableData: TableData) => void;
+  onDeleteTable: () => void;
 }
 
 export function TableView({
@@ -25,6 +26,7 @@ export function TableView({
   onDeleteRow,
   onImportTable,
   onUpdateTable,
+  onDeleteTable,
 }: TableViewProps) {
   const {
     filter,
@@ -50,6 +52,7 @@ export function TableView({
         onExportTable={handleExportTable}
         onEditSchema={onEditSchema}
         onAddRow={onAddRow}
+        onDeleteTable={onDeleteTable}
       />
 
       <SchemaOverview columns={table.columns} />

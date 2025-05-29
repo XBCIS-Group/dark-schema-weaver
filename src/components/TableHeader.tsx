@@ -6,7 +6,8 @@ import {
   Settings,
   Plus,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ interface TableHeaderProps {
   onExportTable: () => void;
   onEditSchema: () => void;
   onAddRow: () => void;
+  onDeleteTable: () => void;
 }
 
 export function TableHeader({
@@ -33,6 +35,7 @@ export function TableHeader({
   onExportTable,
   onEditSchema,
   onAddRow,
+  onDeleteTable,
 }: TableHeaderProps) {
   return (
     <div className="border-b border-border p-4">
@@ -55,6 +58,10 @@ export function TableHeader({
           <Button variant="outline" onClick={onEditSchema}>
             <Settings className="h-4 w-4 mr-2" />
             Schema
+          </Button>
+          <Button variant="destructive" onClick={onDeleteTable}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Table
           </Button>
           <Button onClick={onAddRow}>
             <Plus className="h-4 w-4 mr-2" />

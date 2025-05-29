@@ -107,6 +107,12 @@ const Index = () => {
     databases.find(db => db.id === selectedDatabase)?.tables.find(t => t.id === selectedTable) || null 
     : null;
 
+  const handleDeleteTableFromView = () => {
+    if (selectedTable) {
+      handleDeleteTable(selectedTable);
+    }
+  };
+
   console.log('Current table:', currentTable);
   console.log('Current table columns:', currentTable?.columns);
 
@@ -143,6 +149,7 @@ const Index = () => {
                 onDeleteRow={handleDeleteRow}
                 onImportTable={handleImportTable}
                 onUpdateTable={handleUpdateTable}
+                onDeleteTable={handleDeleteTableFromView}
               />
             </main>
 
