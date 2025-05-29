@@ -1,5 +1,4 @@
-
-export type ColumnType = 'text' | 'number' | 'boolean' | 'date' | 'email' | 'url' | 'json' | 'uuid';
+export type ColumnType = 'text' | 'varchar' | 'number' | 'decimal' | 'boolean' | 'date' | 'email' | 'url' | 'json' | 'uuid';
 
 export interface Column {
   id: string;

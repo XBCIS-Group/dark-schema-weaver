@@ -162,7 +162,9 @@ export function SchemaEditor({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="varchar">Varchar</SelectItem>
                         <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="decimal">Decimal</SelectItem>
                         <SelectItem value="boolean">Boolean</SelectItem>
                         <SelectItem value="date">Date</SelectItem>
                         <SelectItem value="email">Email</SelectItem>
