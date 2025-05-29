@@ -107,19 +107,19 @@ export function DatabaseSidebar({
   };
 
   return (
-    <Sidebar className="border-r border-border w-full h-full">
+    <Sidebar className="border-r border-border">
       <SidebarHeader className="px-4 py-6">
         <div className="flex items-center gap-2 mb-4">
-          <Database className="h-6 w-6 text-primary flex-shrink-0" />
-          <h1 className="text-xl font-bold truncate">Database Manager</h1>
+          <Database className="h-6 w-6 text-primary" />
+          <h1 className="text-xl font-bold">Database Manager</h1>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 w-full"
+            className="pl-9"
           />
         </div>
       </SidebarHeader>
@@ -127,31 +127,31 @@ export function DatabaseSidebar({
       <SidebarContent className="flex-1 overflow-auto">
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center justify-between px-2">
-            <span className="truncate">Databases</span>
-            <Button size="sm" variant="ghost" onClick={onCreateDatabase} className="flex-shrink-0">
+            Databases
+            <Button size="sm" variant="ghost" onClick={onCreateDatabase}>
               <Plus className="h-4 w-4" />
             </Button>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredDatabases.map((database) => (
-                <div key={database.id} className="w-full">
+                <div key={database.id}>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       onClick={() => handleDatabaseClick(database.id)}
                       isActive={selectedDatabase === database.id}
-                      className="flex items-center justify-between w-full min-w-0"
+                      className="flex items-center justify-between w-full"
                     >
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Database className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">{database.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Database className="h-4 w-4" />
+                        <span>{database.name}</span>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            className="h-6 w-6 p-0 flex-shrink-0"
+                            className="h-6 w-6 p-0"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Settings className="h-3 w-3" />
@@ -172,10 +172,10 @@ export function DatabaseSidebar({
                   </SidebarMenuItem>
                   
                   {expandedDatabases.has(database.id) && (
-                    <div className="ml-4 mt-2 space-y-1 w-full">
+                    <div className="ml-4 mt-2 space-y-1">
                       <div className="flex items-center justify-between px-2">
-                        <span className="text-xs text-muted-foreground truncate">Tables</span>
-                        <Button size="sm" variant="ghost" onClick={onCreateTable} className="h-6 w-6 p-0 flex-shrink-0">
+                        <span className="text-xs text-muted-foreground">Tables</span>
+                        <Button size="sm" variant="ghost" onClick={onCreateTable} className="h-6 w-6 p-0">
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
@@ -185,13 +185,13 @@ export function DatabaseSidebar({
                             onClick={() => onSelectTable(table.id)}
                             isActive={selectedTable === table.id}
                             size="sm"
-                            className="flex items-center justify-between w-full min-w-0"
+                            className="flex items-center justify-between w-full"
                           >
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <Table className="h-3 w-3 flex-shrink-0" />
-                              <span className="text-sm truncate">{table.name}</span>
+                            <div className="flex items-center gap-2">
+                              <Table className="h-3 w-3" />
+                              <span className="text-sm">{table.name}</span>
                             </div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
+                            <div className="flex items-center gap-1">
                               <span className="text-xs text-muted-foreground">
                                 {table.rows.length}
                               </span>
@@ -234,14 +234,14 @@ export function DatabaseSidebar({
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <div className="flex gap-2 w-full">
-          <Button size="sm" variant="outline" className="flex-1 min-w-0" onClick={onImportDatabase}>
-            <Import className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Import</span>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="flex-1" onClick={onImportDatabase}>
+            <Import className="h-4 w-4 mr-2" />
+            Import
           </Button>
-          <Button size="sm" variant="outline" className="flex-1 min-w-0" onClick={onExportDatabase}>
-            <Download className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Export</span>
+          <Button size="sm" variant="outline" className="flex-1" onClick={onExportDatabase}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
           </Button>
         </div>
       </SidebarFooter>
