@@ -1,6 +1,5 @@
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { DatabaseSidebar } from '@/components/DatabaseSidebar';
 import { TableView } from '@/components/TableView';
@@ -116,43 +115,36 @@ const Index = () => {
       <div className="min-h-screen bg-background text-foreground">
         <SidebarProvider>
           <div className="min-h-screen flex w-full">
-            <ResizablePanelGroup direction="horizontal" className="min-h-screen">
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
-                <DatabaseSidebar
-                  databases={databases}
-                  selectedDatabase={selectedDatabase}
-                  selectedTable={selectedTable}
-                  onSelectDatabase={setSelectedDatabase}
-                  onSelectTable={setSelectedTable}
-                  onCreateDatabase={openCreateDatabase}
-                  onCreateTable={openCreateTable}
-                  onEditDatabase={handleEditDatabaseClick}
-                  onEditTable={handleEditTableClick}
-                  onDeleteDatabase={handleDeleteDatabase}
-                  onDeleteTable={handleDeleteTable}
-                  onImportDatabase={handleImportDatabase}
-                  onExportDatabase={handleExportDatabase}
-                />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={80}>
-                <main className="flex-1 flex flex-col h-full">
-                  <div className="border-b border-border p-4 bg-card flex items-center justify-between">
-                    <SidebarTrigger />
-                    <ThemeToggle />
-                  </div>
-                  <TableView
-                    table={currentTable}
-                    onEditSchema={openSchemaEditor}
-                    onAddRow={openAddRow}
-                    onEditRow={handleEditRowClick}
-                    onDeleteRow={handleDeleteRow}
-                    onImportTable={handleImportTable}
-                    onUpdateTable={handleUpdateTable}
-                  />
-                </main>
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <DatabaseSidebar
+              databases={databases}
+              selectedDatabase={selectedDatabase}
+              selectedTable={selectedTable}
+              onSelectDatabase={setSelectedDatabase}
+              onSelectTable={setSelectedTable}
+              onCreateDatabase={openCreateDatabase}
+              onCreateTable={openCreateTable}
+              onEditDatabase={handleEditDatabaseClick}
+              onEditTable={handleEditTableClick}
+              onDeleteDatabase={handleDeleteDatabase}
+              onDeleteTable={handleDeleteTable}
+              onImportDatabase={handleImportDatabase}
+              onExportDatabase={handleExportDatabase}
+            />
+            <main className="flex-1 flex flex-col h-full">
+              <div className="border-b border-border p-4 bg-card flex items-center justify-between">
+                <SidebarTrigger />
+                <ThemeToggle />
+              </div>
+              <TableView
+                table={currentTable}
+                onEditSchema={openSchemaEditor}
+                onAddRow={openAddRow}
+                onEditRow={handleEditRowClick}
+                onDeleteRow={handleDeleteRow}
+                onImportTable={handleImportTable}
+                onUpdateTable={handleUpdateTable}
+              />
+            </main>
 
             <SchemaEditor
               isOpen={schemaEditorOpen}
