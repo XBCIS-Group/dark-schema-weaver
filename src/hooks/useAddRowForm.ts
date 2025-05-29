@@ -11,6 +11,22 @@ interface UseAddRowFormProps {
 export function useAddRowForm({ columns, onSubmit, onClose }: UseAddRowFormProps) {
   console.log('useAddRowForm initialized with columns:', columns);
   
+  // Early validation - if no columns, don't proceed
+  if (!columns || columns.length === 0) {
+    console.error('useAddRowForm: No columns provided');
+    return {
+      rowData: {},
+      errors: {},
+      editableColumns: [],
+      handleInputChange: () => {},
+      handleSubmit: () => {
+        console.error('Cannot submit: No columns available');
+        onClose();
+      },
+      handleClose: onClose,
+    };
+  }
+  
   const [rowData, setRowData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 

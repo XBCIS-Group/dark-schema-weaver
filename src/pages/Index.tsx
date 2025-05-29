@@ -113,6 +113,30 @@ const Index = () => {
     }
   };
 
+  // Add validation for opening AddRow dialog
+  const handleOpenAddRow = () => {
+    console.log('=== ATTEMPTING TO OPEN ADD ROW DIALOG ===');
+    console.log('Selected database:', selectedDatabase);
+    console.log('Selected table:', selectedTable);
+    console.log('Current table:', currentTable);
+    console.log('Current table columns:', currentTable?.columns);
+    
+    if (!selectedDatabase || !selectedTable || !currentTable) {
+      console.error('Cannot open add row dialog: missing selection');
+      // You could add a toast here if needed
+      return;
+    }
+    
+    if (!currentTable.columns || currentTable.columns.length === 0) {
+      console.error('Cannot open add row dialog: no columns in table');
+      // You could add a toast here if needed
+      return;
+    }
+    
+    console.log('Opening add row dialog with valid table data');
+    openAddRow();
+  };
+
   console.log('Current table:', currentTable);
   console.log('Current table columns:', currentTable?.columns);
 
@@ -144,7 +168,7 @@ const Index = () => {
               <TableView
                 table={currentTable}
                 onEditSchema={openSchemaEditor}
-                onAddRow={openAddRow}
+                onAddRow={handleOpenAddRow}
                 onEditRow={handleEditRowClick}
                 onDeleteRow={handleDeleteRow}
                 onImportTable={handleImportTable}
@@ -187,13 +211,16 @@ const Index = () => {
               currentName={editingTable?.name || ''}
             />
 
-            <AddRowDialog
-              isOpen={addRowOpen}
-              onClose={closeAddRow}
-              onAddRow={handleAddRow}
-              columns={currentTable?.columns || []}
-              tableName={currentTable?.name || ""}
-            />
+            {/* Only render AddRowDialog if we have valid table data */}
+            {currentTable && currentTable.columns && currentTable.columns.length > 0 && (
+              <AddRowDialog
+                isOpen={addRowOpen}
+                onClose={closeAddRow}
+                onAddRow={handleAddRow}
+                columns={currentTable.columns}
+                tableName={currentTable.name}
+              />
+            )}
 
             <EditRowDialog
               isOpen={editRowOpen}
