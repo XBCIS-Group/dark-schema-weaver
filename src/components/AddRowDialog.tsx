@@ -39,6 +39,9 @@ export function AddRowDialog({
   const [rowData, setRowData] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Filter out primary key columns since they shouldn't be manually entered
+  const editableColumns = columns.filter(column => !column.primaryKey);
+
   const handleInputChange = (columnName: string, value: string) => {
     setRowData(prev => ({ ...prev, [columnName]: value }));
     if (errors[columnName]) {
@@ -53,7 +56,7 @@ export function AddRowDialog({
   const validateRow = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    columns.forEach(column => {
+    editableColumns.forEach(column => {
       const value = rowData[column.name];
       
       if (!column.nullable && (!value || value.toString().trim() === '')) {
@@ -88,17 +91,22 @@ export function AddRowDialog({
           <DialogTitle>Add New Row</DialogTitle>
           <DialogDescription>
             Add a new row to the {tableName} table. Fill in the required fields.
+            {columns.some(col => col.primaryKey) && (
+              <span className="block text-sm text-muted-foreground mt-1">
+                Primary key fields are auto-generated and not shown.
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
-          {columns.map((column) => (
+          {editableColumns.map((column) => (
             <div key={column.id} className="space-y-2">
               <Label htmlFor={column.id} className="flex items-center gap-2">
                 {column.name}
                 {!column.nullable && <span className="text-red-500">*</span>}
-                {column.primaryKey && (
-                  <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">PK</span>
+                {column.unique && (
+                  <span className="text-xs bg-amber-100 text-amber-800 px-1 rounded">UNIQUE</span>
                 )}
               </Label>
               <Input
@@ -113,13 +121,18 @@ export function AddRowDialog({
               )}
             </div>
           ))}
+          {editableColumns.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No editable fields available. All columns are primary keys.
+            </p>
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={editableColumns.length === 0}>
             Add Row
           </Button>
         </DialogFooter>
