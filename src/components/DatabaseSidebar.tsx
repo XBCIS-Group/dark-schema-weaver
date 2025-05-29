@@ -9,7 +9,9 @@ import {
   Download,
   Trash2,
   Edit,
-  Search
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   Sidebar,
@@ -22,6 +24,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,6 +90,7 @@ export function DatabaseSidebar({
 }: DatabaseSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedDatabases, setExpandedDatabases] = useState<Set<string>>(new Set());
+  const { state, toggleSidebar } = useSidebar();
 
   const filteredDatabases = databases.filter(db =>
     db.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,9 +113,23 @@ export function DatabaseSidebar({
   return (
     <Sidebar className="border-r border-border">
       <SidebarHeader className="px-4 py-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Database className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">Database Manager</h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-bold">Database Manager</h1>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="h-8 w-8 p-0"
+          >
+            {state === "expanded" ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
