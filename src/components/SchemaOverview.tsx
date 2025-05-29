@@ -9,6 +9,7 @@ interface Column {
   nullable: boolean;
   primaryKey: boolean;
   unique: boolean;
+  autoIncrement: boolean;
 }
 
 interface SchemaOverviewProps {
@@ -30,6 +31,7 @@ export function SchemaOverview({ columns }: SchemaOverviewProps) {
             <span className="text-xs opacity-70">({column.type})</span>
             {column.primaryKey && <span className="text-xs">PK</span>}
             {column.unique && <span className="text-xs">U</span>}
+            {column.autoIncrement && <span className="text-xs">AI</span>}
           </Badge>
         ))}
       </div>

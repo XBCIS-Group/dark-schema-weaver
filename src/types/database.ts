@@ -1,5 +1,5 @@
 
-export type ColumnType = 'text' | 'number' | 'boolean' | 'date';
+export type ColumnType = 'text' | 'number' | 'boolean' | 'date' | 'email' | 'url' | 'json' | 'uuid';
 
 export interface Column {
   id: string;
@@ -8,6 +8,7 @@ export interface Column {
   nullable: boolean;
   primaryKey: boolean;
   unique: boolean;
+  autoIncrement: boolean;
   defaultValue?: string | null;
 }
 

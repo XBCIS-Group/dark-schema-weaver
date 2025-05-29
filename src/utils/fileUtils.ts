@@ -52,6 +52,7 @@ export const csvToTable = (headers: string[], rows: string[][], tableName: strin
     nullable: true,
     primaryKey: index === 0,
     unique: false,
+    autoIncrement: false,
     defaultValue: null,
   }));
 

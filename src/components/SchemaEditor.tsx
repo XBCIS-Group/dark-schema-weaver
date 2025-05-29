@@ -50,6 +50,7 @@ export function SchemaEditor({
       nullable: true,
       primaryKey: false,
       unique: false,
+      autoIncrement: false,
       defaultValue: null,
     };
     setEditedColumns([...editedColumns, newColumn]);
@@ -60,9 +61,30 @@ export function SchemaEditor({
   };
 
   const updateColumn = (id: string, field: keyof Column, value: any) => {
-    setEditedColumns(editedColumns.map(col => 
-      col.id === id ? { ...col, [field]: value } : col
-    ));
+    setEditedColumns(editedColumns.map(col => {
+      if (col.id === id) {
+        const updatedCol = { ...col, [field]: value };
+        
+        // Auto-increment can only be applied to number columns
+        if (field === 'autoIncrement' && value && col.type !== 'number') {
+          updatedCol.type = 'number';
+        }
+        
+        // If auto-increment is enabled, it should be unique and not nullable
+        if (field === 'autoIncrement' && value) {
+          updatedCol.unique = true;
+          updatedCol.nullable = false;
+        }
+        
+        // If type changes from number, disable auto-increment
+        if (field === 'type' && value !== 'number') {
+          updatedCol.autoIncrement = false;
+        }
+        
+        return updatedCol;
+      }
+      return col;
+    }));
   };
 
   const handleSave = () => {
@@ -72,6 +94,13 @@ export function SchemaEditor({
       alert('All columns must have names');
       return;
     }
+
+    // Validate that only one primary key exists
+    const primaryKeys = validColumns.filter(col => col.primaryKey);
+    if (primaryKeys.length > 1) {
+      alert('Only one column can be set as primary key');
+      return;
+    }
     
     onSave(validColumns);
     onClose();
@@ -79,7 +108,7 @@ export function SchemaEditor({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Schema - {tableName}</DialogTitle>
           <DialogDescription>
@@ -96,9 +125,9 @@ export function SchemaEditor({
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {editedColumns.map((column, index) => (
-              <div key={column.id} className="p-4 border rounded-lg space-y-3">
+              <div key={column.id} className="p-4 border rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Column {index + 1}</span>
                   <Button
@@ -136,6 +165,10 @@ export function SchemaEditor({
                         <SelectItem value="number">Number</SelectItem>
                         <SelectItem value="boolean">Boolean</SelectItem>
                         <SelectItem value="date">Date</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="url">URL</SelectItem>
+                        <SelectItem value="json">JSON</SelectItem>
+                        <SelectItem value="uuid">UUID</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -149,18 +182,62 @@ export function SchemaEditor({
                       value={column.defaultValue || ''}
                       onChange={(e) => updateColumn(column.id, 'defaultValue', e.target.value || null)}
                       placeholder="Enter default value"
+                      disabled={column.autoIncrement}
                     />
                   </div>
                   
-                  <div className="flex items-center space-x-2 pt-6">
-                    <input
-                      type="checkbox"
-                      id={`nullable-${column.id}`}
-                      checked={column.nullable}
-                      onChange={(e) => updateColumn(column.id, 'nullable', e.target.checked)}
-                      className="rounded"
-                    />
-                    <Label htmlFor={`nullable-${column.id}`}>Allow Null</Label>
+                  <div className="space-y-2">
+                    <Label>Options</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`nullable-${column.id}`}
+                          checked={column.nullable}
+                          onChange={(e) => updateColumn(column.id, 'nullable', e.target.checked)}
+                          className="rounded"
+                          disabled={column.autoIncrement || column.primaryKey}
+                        />
+                        <Label htmlFor={`nullable-${column.id}`} className="text-sm">Allow Null</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`primary-${column.id}`}
+                          checked={column.primaryKey}
+                          onChange={(e) => updateColumn(column.id, 'primaryKey', e.target.checked)}
+                          className="rounded"
+                        />
+                        <Label htmlFor={`primary-${column.id}`} className="text-sm">Primary Key</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`unique-${column.id}`}
+                          checked={column.unique}
+                          onChange={(e) => updateColumn(column.id, 'unique', e.target.checked)}
+                          className="rounded"
+                          disabled={column.autoIncrement || column.primaryKey}
+                        />
+                        <Label htmlFor={`unique-${column.id}`} className="text-sm">Unique</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`autoincrement-${column.id}`}
+                          checked={column.autoIncrement}
+                          onChange={(e) => updateColumn(column.id, 'autoIncrement', e.target.checked)}
+                          className="rounded"
+                          disabled={column.type !== 'number'}
+                        />
+                        <Label htmlFor={`autoincrement-${column.id}`} className="text-sm">
+                          Auto Increment {column.type !== 'number' && '(Numbers only)'}
+                        </Label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -40,6 +40,7 @@ export function useTableManagement({
           nullable: false,
           primaryKey: true,
           unique: true,
+          autoIncrement: true,
           defaultValue: null,
         }
       ],
