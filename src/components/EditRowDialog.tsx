@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Column } from '@/types/database';
 
 interface EditRowDialogProps {
@@ -43,11 +44,52 @@ export function EditRowDialog({
     onClose();
   };
 
-  const handleInputChange = (columnName: string, value: string) => {
+  const handleInputChange = (columnName: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [columnName]: value
     }));
+  };
+
+  const renderInputField = (column: Column) => {
+    const value = formData[column.name];
+
+    if (column.type === 'boolean') {
+      return (
+        <Checkbox
+          id={column.name}
+          checked={value || false}
+          onCheckedChange={(checked) => handleInputChange(column.name, checked)}
+          disabled={column.primaryKey}
+        />
+      );
+    }
+
+    if (column.type === 'number' || column.type === 'decimal') {
+      return (
+        <Input
+          id={column.name}
+          type="number"
+          step={column.type === 'decimal' ? '0.01' : '1'}
+          value={value || ''}
+          onChange={(e) => handleInputChange(column.name, e.target.value)}
+          disabled={column.primaryKey}
+          className="col-span-3"
+          placeholder={column.nullable ? 'NULL' : `Enter ${column.name}`}
+        />
+      );
+    }
+
+    return (
+      <Input
+        id={column.name}
+        value={value || ''}
+        onChange={(e) => handleInputChange(column.name, e.target.value)}
+        disabled={column.primaryKey}
+        className="col-span-3"
+        placeholder={column.nullable ? 'NULL' : `Enter ${column.name}`}
+      />
+    );
   };
 
   if (!rowData) return null;
@@ -66,14 +108,7 @@ export function EditRowDialog({
                   {column.name}
                   {column.primaryKey && <span className="text-xs text-muted-foreground ml-1">(PK)</span>}
                 </Label>
-                <Input
-                  id={column.name}
-                  value={formData[column.name] || ''}
-                  onChange={(e) => handleInputChange(column.name, e.target.value)}
-                  disabled={column.primaryKey}
-                  className="col-span-3"
-                  placeholder={column.nullable ? 'NULL' : `Enter ${column.name}`}
-                />
+                {renderInputField(column)}
               </div>
             ))}
           </div>

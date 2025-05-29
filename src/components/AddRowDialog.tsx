@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Column {
   id: string;
@@ -42,7 +43,7 @@ export function AddRowDialog({
   // Filter out primary key columns since they shouldn't be manually entered
   const editableColumns = columns.filter(column => !column.primaryKey);
 
-  const handleInputChange = (columnName: string, value: string) => {
+  const handleInputChange = (columnName: string, value: string | boolean) => {
     setRowData(prev => ({ ...prev, [columnName]: value }));
     if (errors[columnName]) {
       setErrors(prev => {
@@ -59,7 +60,7 @@ export function AddRowDialog({
     editableColumns.forEach(column => {
       const value = rowData[column.name];
       
-      if (!column.nullable && (!value || value.toString().trim() === '')) {
+      if (!column.nullable && (value === undefined || value === null || value === '')) {
         newErrors[column.name] = 'This field is required';
       }
     });
@@ -82,6 +83,44 @@ export function AddRowDialog({
     setRowData({});
     setErrors({});
     onClose();
+  };
+
+  const renderInputField = (column: Column) => {
+    const value = rowData[column.name];
+
+    if (column.type === 'boolean') {
+      return (
+        <Checkbox
+          id={column.id}
+          checked={value || false}
+          onCheckedChange={(checked) => handleInputChange(column.name, checked)}
+        />
+      );
+    }
+
+    if (column.type === 'number' || column.type === 'decimal') {
+      return (
+        <Input
+          id={column.id}
+          type="number"
+          step={column.type === 'decimal' ? '0.01' : '1'}
+          placeholder={`Enter ${column.name.toLowerCase()}...`}
+          value={value || ''}
+          onChange={(e) => handleInputChange(column.name, e.target.value)}
+          className={errors[column.name] ? 'border-red-500' : ''}
+        />
+      );
+    }
+
+    return (
+      <Input
+        id={column.id}
+        placeholder={`Enter ${column.name.toLowerCase()}...`}
+        value={value || ''}
+        onChange={(e) => handleInputChange(column.name, e.target.value)}
+        className={errors[column.name] ? 'border-red-500' : ''}
+      />
+    );
   };
 
   return (
@@ -109,13 +148,7 @@ export function AddRowDialog({
                   <span className="text-xs bg-amber-100 text-amber-800 px-1 rounded">UNIQUE</span>
                 )}
               </Label>
-              <Input
-                id={column.id}
-                placeholder={`Enter ${column.name.toLowerCase()}...`}
-                value={rowData[column.name] || ''}
-                onChange={(e) => handleInputChange(column.name, e.target.value)}
-                className={errors[column.name] ? 'border-red-500' : ''}
-              />
+              {renderInputField(column)}
               {errors[column.name] && (
                 <p className="text-sm text-red-500">{errors[column.name]}</p>
               )}
