@@ -36,6 +36,17 @@ export function TableView({
     handleExportTable,
   } = useTableView(table, onImportTable);
 
+  const handleReorderRows = (newRows: Record<string, any>[]) => {
+    if (!table) return;
+    
+    const updatedTable = {
+      ...table,
+      rows: newRows
+    };
+    
+    onUpdateTable(updatedTable);
+  };
+
   if (!table) {
     return <EmptyTableState onImportTable={handleImportTable} />;
   }
@@ -62,6 +73,7 @@ export function TableView({
         rows={filteredRows}
         onEditRow={onEditRow}
         onDeleteRow={onDeleteRow}
+        onReorderRows={handleReorderRows}
       />
     </div>
   );

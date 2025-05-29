@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { Column, ColumnType } from '@/types/database';
 
 interface SchemaEditorProps {
@@ -36,6 +37,7 @@ export function SchemaEditor({
   onSave,
 }: SchemaEditorProps) {
   const [editedColumns, setEditedColumns] = useState<Column[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setEditedColumns([...columns]);
@@ -86,6 +88,29 @@ export function SchemaEditor({
     }));
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newColumns = [...editedColumns];
+    const draggedColumn = newColumns[draggedIndex];
+    
+    // Remove the dragged column and insert it at the new position
+    newColumns.splice(draggedIndex, 1);
+    newColumns.splice(index, 0, draggedColumn);
+    
+    setEditedColumns(newColumns);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   const handleSave = () => {
     // Validate that all columns have names
     const validColumns = editedColumns.filter(col => col.name.trim() !== '');
@@ -111,7 +136,7 @@ export function SchemaEditor({
         <DialogHeader>
           <DialogTitle>Edit Schema - {tableName}</DialogTitle>
           <DialogDescription>
-            Modify the structure of your table by adding, removing, or editing columns.
+            Modify the structure of your table by adding, removing, or editing columns. Drag columns to reorder them.
           </DialogDescription>
         </DialogHeader>
 
@@ -126,9 +151,23 @@ export function SchemaEditor({
 
           <div className="space-y-4">
             {editedColumns.map((column, index) => (
-              <div key={column.id} className="p-4 border rounded-lg space-y-4">
+              <div 
+                key={column.id} 
+                className="p-4 border rounded-lg space-y-4 bg-card"
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                style={{
+                  opacity: draggedIndex === index ? 0.5 : 1,
+                  cursor: 'move'
+                }}
+              >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Column {index + 1}</span>
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                    <span className="text-sm font-medium">Column {index + 1}</span>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
