@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Column } from '@/types/database';
+import { format } from 'date-fns';
 
 interface DataTableProps {
   columns: Column[];
@@ -27,6 +28,37 @@ interface DataTableProps {
 }
 
 export function DataTable({ columns, rows, onEditRow, onDeleteRow }: DataTableProps) {
+  const formatCellValue = (value: any, column: Column) => {
+    if (value === null || value === undefined) {
+      return <span className="text-muted-foreground italic">NULL</span>;
+    }
+
+    // Handle Date objects
+    if (value instanceof Date) {
+      return format(value, 'PPP');
+    }
+
+    // Handle date strings for date type columns
+    if (column.type === 'date' && typeof value === 'string') {
+      try {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          return format(date, 'PPP');
+        }
+      } catch (error) {
+        console.warn('Invalid date value:', value);
+      }
+    }
+
+    // Handle boolean values
+    if (typeof value === 'boolean') {
+      return value ? 'True' : 'False';
+    }
+
+    // Convert everything else to string
+    return String(value);
+  };
+
   return (
     <div className="flex-1 overflow-auto">
       <Table>
@@ -50,9 +82,7 @@ export function DataTable({ columns, rows, onEditRow, onDeleteRow }: DataTablePr
             <TableRow key={index}>
               {columns.map((column) => (
                 <TableCell key={column.id}>
-                  {row[column.name] ?? (
-                    <span className="text-muted-foreground italic">NULL</span>
-                  )}
+                  {formatCellValue(row[column.name], column)}
                 </TableCell>
               ))}
               <TableCell>
