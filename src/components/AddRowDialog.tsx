@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,15 +9,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { FormField } from '@/components/form/FormField';
+import { useAddRowForm } from '@/hooks/useAddRowForm';
 
 interface Column {
   id: string;
@@ -43,120 +37,14 @@ export function AddRowDialog({
   columns,
   tableName,
 }: AddRowDialogProps) {
-  const [rowData, setRowData] = useState<Record<string, any>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Filter out primary key columns since they shouldn't be manually entered
-  const editableColumns = columns.filter(column => !column.primaryKey);
-
-  const handleInputChange = (columnName: string, value: string | boolean | Date) => {
-    setRowData(prev => ({ ...prev, [columnName]: value }));
-    if (errors[columnName]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[columnName];
-        return newErrors;
-      });
-    }
-  };
-
-  const validateRow = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    editableColumns.forEach(column => {
-      const value = rowData[column.name];
-      
-      if (!column.nullable && (value === undefined || value === null || value === '')) {
-        newErrors[column.name] = 'This field is required';
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (validateRow()) {
-      const newRow = { ...rowData, id: Date.now() };
-      onAddRow(newRow);
-      setRowData({});
-      setErrors({});
-      onClose();
-    }
-  };
-
-  const handleClose = () => {
-    setRowData({});
-    setErrors({});
-    onClose();
-  };
-
-  const renderInputField = (column: Column) => {
-    const value = rowData[column.name];
-
-    if (column.type === 'boolean') {
-      return (
-        <Checkbox
-          id={column.id}
-          checked={value || false}
-          onCheckedChange={(checked) => handleInputChange(column.name, checked)}
-        />
-      );
-    }
-
-    if (column.type === 'date') {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !value && "text-muted-foreground",
-                errors[column.name] && "border-red-500"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {value ? format(new Date(value), "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={value ? new Date(value) : undefined}
-              onSelect={(date) => date && handleInputChange(column.name, date)}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
-    if (column.type === 'number' || column.type === 'decimal') {
-      return (
-        <Input
-          id={column.id}
-          type="number"
-          step={column.type === 'decimal' ? '0.01' : '1'}
-          placeholder={`Enter ${column.name.toLowerCase()}...`}
-          value={value || ''}
-          onChange={(e) => handleInputChange(column.name, e.target.value)}
-          className={errors[column.name] ? 'border-red-500' : ''}
-        />
-      );
-    }
-
-    return (
-      <Input
-        id={column.id}
-        placeholder={`Enter ${column.name.toLowerCase()}...`}
-        value={value || ''}
-        onChange={(e) => handleInputChange(column.name, e.target.value)}
-        className={errors[column.name] ? 'border-red-500' : ''}
-      />
-    );
-  };
+  const {
+    rowData,
+    errors,
+    editableColumns,
+    handleInputChange,
+    handleSubmit,
+    handleClose,
+  } = useAddRowForm({ columns, onSubmit: onAddRow, onClose });
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -176,19 +64,13 @@ export function AddRowDialog({
         <ScrollArea className="flex-1 min-h-0 max-h-[400px]">
           <div className="space-y-4 pr-4">
             {editableColumns.map((column) => (
-              <div key={column.id} className="space-y-2">
-                <Label htmlFor={column.id} className="flex items-center gap-2">
-                  {column.name}
-                  {!column.nullable && <span className="text-red-500">*</span>}
-                  {column.unique && (
-                    <span className="text-xs bg-amber-100 text-amber-800 px-1 rounded">UNIQUE</span>
-                  )}
-                </Label>
-                {renderInputField(column)}
-                {errors[column.name] && (
-                  <p className="text-sm text-red-500">{errors[column.name]}</p>
-                )}
-              </div>
+              <FormField
+                key={column.id}
+                column={column}
+                value={rowData[column.name]}
+                onChange={(value) => handleInputChange(column.name, value)}
+                error={errors[column.name]}
+              />
             ))}
             {editableColumns.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
