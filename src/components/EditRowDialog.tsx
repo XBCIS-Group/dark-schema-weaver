@@ -11,6 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { Column } from '@/types/database';
 
 interface EditRowDialogProps {
@@ -44,7 +49,7 @@ export function EditRowDialog({
     onClose();
   };
 
-  const handleInputChange = (columnName: string, value: string | boolean) => {
+  const handleInputChange = (columnName: string, value: string | boolean | Date) => {
     setFormData(prev => ({
       ...prev,
       [columnName]: value
@@ -62,6 +67,35 @@ export function EditRowDialog({
           onCheckedChange={(checked) => handleInputChange(column.name, checked)}
           disabled={column.primaryKey}
         />
+      );
+    }
+
+    if (column.type === 'date') {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "col-span-3 justify-start text-left font-normal",
+                !value && "text-muted-foreground"
+              )}
+              disabled={column.primaryKey}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value ? format(new Date(value), "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={value ? new Date(value) : undefined}
+              onSelect={(date) => date && handleInputChange(column.name, date)}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
       );
     }
 

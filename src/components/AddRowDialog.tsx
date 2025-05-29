@@ -12,6 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Column {
   id: string;
@@ -43,7 +49,7 @@ export function AddRowDialog({
   // Filter out primary key columns since they shouldn't be manually entered
   const editableColumns = columns.filter(column => !column.primaryKey);
 
-  const handleInputChange = (columnName: string, value: string | boolean) => {
+  const handleInputChange = (columnName: string, value: string | boolean | Date) => {
     setRowData(prev => ({ ...prev, [columnName]: value }));
     if (errors[columnName]) {
       setErrors(prev => {
@@ -98,6 +104,35 @@ export function AddRowDialog({
       );
     }
 
+    if (column.type === 'date') {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !value && "text-muted-foreground",
+                errors[column.name] && "border-red-500"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value ? format(new Date(value), "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={value ? new Date(value) : undefined}
+              onSelect={(date) => date && handleInputChange(column.name, date)}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
     if (column.type === 'number' || column.type === 'decimal') {
       return (
         <Input
@@ -125,7 +160,7 @@ export function AddRowDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Add New Row</DialogTitle>
           <DialogDescription>
@@ -138,28 +173,30 @@ export function AddRowDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {editableColumns.map((column) => (
-            <div key={column.id} className="space-y-2">
-              <Label htmlFor={column.id} className="flex items-center gap-2">
-                {column.name}
-                {!column.nullable && <span className="text-red-500">*</span>}
-                {column.unique && (
-                  <span className="text-xs bg-amber-100 text-amber-800 px-1 rounded">UNIQUE</span>
+        <ScrollArea className="flex-1 pr-3">
+          <div className="space-y-4">
+            {editableColumns.map((column) => (
+              <div key={column.id} className="space-y-2">
+                <Label htmlFor={column.id} className="flex items-center gap-2">
+                  {column.name}
+                  {!column.nullable && <span className="text-red-500">*</span>}
+                  {column.unique && (
+                    <span className="text-xs bg-amber-100 text-amber-800 px-1 rounded">UNIQUE</span>
+                  )}
+                </Label>
+                {renderInputField(column)}
+                {errors[column.name] && (
+                  <p className="text-sm text-red-500">{errors[column.name]}</p>
                 )}
-              </Label>
-              {renderInputField(column)}
-              {errors[column.name] && (
-                <p className="text-sm text-red-500">{errors[column.name]}</p>
-              )}
-            </div>
-          ))}
-          {editableColumns.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No editable fields available. All columns are primary keys.
-            </p>
-          )}
-        </div>
+              </div>
+            ))}
+            {editableColumns.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No editable fields available. All columns are primary keys.
+              </p>
+            )}
+          </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
