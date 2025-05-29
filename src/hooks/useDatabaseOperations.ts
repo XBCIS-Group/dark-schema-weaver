@@ -2,28 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput, readFile } from '@/utils/fileUtils';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-}
-
-interface Table {
-  id: string;
-  name: string;
-  columns: Column[];
-  rows: Record<string, any>[];
-}
-
-interface Database {
-  id: string;
-  name: string;
-  tables: Table[];
-}
+import { Database } from '@/types/database';
 
 export function useDatabaseOperations() {
   const [databases, setDatabases] = useState<Database[]>([]);

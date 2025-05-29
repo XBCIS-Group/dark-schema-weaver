@@ -2,26 +2,11 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput, readFile, parseCSV, csvToTable, tableToCSV } from '@/utils/fileUtils';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-}
-
-interface TableData {
-  id: string;
-  name: string;
-  columns: Column[];
-  rows: Record<string, any>[];
-}
+import { Table } from '@/types/database';
 
 export function useTableView(
-  table: TableData | null,
-  onImportTable: (tableData: TableData) => void
+  table: Table | null,
+  onImportTable: (tableData: Table) => void
 ) {
   const [filter, setFilter] = useState('');
   const { toast } = useToast();
