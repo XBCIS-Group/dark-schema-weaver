@@ -12,15 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FormField } from '@/components/form/FormField';
 import { useAddRowForm } from '@/hooks/useAddRowForm';
-
-interface Column {
-  id: string;
-  name: string;
-  type: string;
-  nullable: boolean;
-  primaryKey: boolean;
-  unique: boolean;
-}
+import { Column } from '@/types/database';
 
 interface AddRowDialogProps {
   isOpen: boolean;
