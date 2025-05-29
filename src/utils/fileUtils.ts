@@ -1,4 +1,6 @@
 
+import { ColumnType } from '@/types/database';
+
 export const downloadFile = (data: string, filename: string, type: string) => {
   const blob = new Blob([data], { type });
   const url = URL.createObjectURL(blob);
@@ -46,10 +48,11 @@ export const csvToTable = (headers: string[], rows: string[][], tableName: strin
   const columns = headers.map((header, index) => ({
     id: `col_${index}`,
     name: header,
-    type: 'TEXT',
+    type: 'text' as ColumnType,
     nullable: true,
     primaryKey: index === 0,
     unique: false,
+    defaultValue: null,
   }));
 
   const tableRows = rows.map((row, rowIndex) => {
