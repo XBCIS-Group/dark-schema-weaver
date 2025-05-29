@@ -1,3 +1,4 @@
+
 import { useToast } from '@/hooks/use-toast';
 import { Table, Database } from '@/types/database';
 
@@ -35,10 +36,11 @@ export function useTableManagement({
         {
           id: 'id',
           name: 'id',
-          type: 'INTEGER',
+          type: 'number',
           nullable: false,
           primaryKey: true,
           unique: true,
+          defaultValue: null,
         }
       ],
       rows: [],
