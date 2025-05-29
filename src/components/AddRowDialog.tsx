@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { FormField } from '@/components/form/FormField';
 import { useAddRowForm } from '@/hooks/useAddRowForm';
 import { Column } from '@/types/database';
@@ -40,8 +39,8 @@ export function AddRowDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
           <DialogTitle>Add New Row</DialogTitle>
           <DialogDescription>
             Add a new row to the {tableName} table. Fill in the required fields.
@@ -53,28 +52,24 @@ export function AddRowDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full max-h-[50vh]">
-            <div className="space-y-4 pr-4 pb-2">
-              {editableColumns.map((column) => (
-                <FormField
-                  key={column.id}
-                  column={column}
-                  value={rowData[column.name]}
-                  onChange={(value) => handleInputChange(column.name, value)}
-                  error={errors[column.name]}
-                />
-              ))}
-              {editableColumns.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No editable fields available. All columns are primary keys.
-                </p>
-              )}
-            </div>
-          </ScrollArea>
+        <div className="space-y-4">
+          {editableColumns.map((column) => (
+            <FormField
+              key={column.id}
+              column={column}
+              value={rowData[column.name]}
+              onChange={(value) => handleInputChange(column.name, value)}
+              error={errors[column.name]}
+            />
+          ))}
+          {editableColumns.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No editable fields available. All columns are primary keys.
+            </p>
+          )}
         </div>
 
-        <DialogFooter className="flex-shrink-0 mt-4">
+        <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
