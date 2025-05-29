@@ -17,8 +17,14 @@ export function useSchemaOperations({
 }: UseSchemaOperationsProps) {
   const { toast } = useToast();
 
-  const handleSaveSchema = (tableName: string, columns: Column[]) => {
+  const handleSaveSchema = (columns: Column[]) => {
     if (!selectedDatabase || !selectedTable) return;
+
+    const currentTable = databases
+      .find(db => db.id === selectedDatabase)
+      ?.tables.find(table => table.id === selectedTable);
+
+    if (!currentTable) return;
 
     setDatabases(prev => prev.map(db => 
       db.id === selectedDatabase 
@@ -26,7 +32,7 @@ export function useSchemaOperations({
             ...db,
             tables: db.tables.map(table => 
               table.id === selectedTable
-                ? { ...table, columns: columns, name: tableName }
+                ? { ...table, columns: columns }
                 : table
             )
           }
@@ -35,7 +41,7 @@ export function useSchemaOperations({
 
     toast({
       title: "Schema Updated",
-      description: `Schema for table "${tableName}" has been updated successfully.`,
+      description: `Schema for table "${currentTable.name}" has been updated successfully.`,
     });
   };
 

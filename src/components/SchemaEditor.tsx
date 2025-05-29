@@ -48,6 +48,8 @@ export function SchemaEditor({
       name: `column_${editedColumns.length + 1}`,
       type: 'text',
       nullable: true,
+      primaryKey: false,
+      unique: false,
       defaultValue: null,
     };
     setEditedColumns([...editedColumns, newColumn]);
