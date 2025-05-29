@@ -160,8 +160,8 @@ export function AddRowDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Add New Row</DialogTitle>
           <DialogDescription>
             Add a new row to the {tableName} table. Fill in the required fields.
@@ -173,8 +173,8 @@ export function AddRowDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 pr-3">
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 min-h-0 max-h-[400px]">
+          <div className="space-y-4 pr-4">
             {editableColumns.map((column) => (
               <div key={column.id} className="space-y-2">
                 <Label htmlFor={column.id} className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export function AddRowDialog({
           </div>
         </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
