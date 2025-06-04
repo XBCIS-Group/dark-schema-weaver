@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { validateDatabaseName, sanitizeInput } from '@/utils/validation';
 
 interface CreateDatabaseDialogProps {
   isOpen: boolean;
@@ -23,19 +24,42 @@ export function CreateDatabaseDialog({
   onCreateDatabase,
 }: CreateDatabaseDialogProps) {
   const [databaseName, setDatabaseName] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (databaseName.trim()) {
-      onCreateDatabase(databaseName.trim());
-      setDatabaseName('');
-      onClose();
+    
+    const sanitized = sanitizeInput(databaseName);
+    const validation = validateDatabaseName(sanitized);
+    
+    if (!validation.isValid) {
+      setError(validation.error || 'Invalid database name');
+      return;
     }
+    
+    onCreateDatabase(sanitized);
+    setDatabaseName('');
+    setError(null);
+    onClose();
   };
 
   const handleClose = () => {
     setDatabaseName('');
+    setError(null);
     onClose();
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDatabaseName(value);
+    
+    if (error) {
+      const sanitized = sanitizeInput(value);
+      const validation = validateDatabaseName(sanitized);
+      if (validation.isValid) {
+        setError(null);
+      }
+    }
   };
 
   return (
@@ -51,10 +75,17 @@ export function CreateDatabaseDialog({
               <Input
                 id="database-name"
                 value={databaseName}
-                onChange={(e) => setDatabaseName(e.target.value)}
+                onChange={handleNameChange}
                 placeholder="Enter database name"
                 autoFocus
+                maxLength={50}
               />
+              {error && (
+                <p className="text-sm text-red-500 mt-1">{error}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Must start with a letter and contain only letters, numbers, and underscores
+              </p>
             </div>
           </div>
           <DialogFooter>

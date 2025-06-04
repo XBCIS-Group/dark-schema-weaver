@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { createFileInput, readFile, parseCSV, csvToTable, tableToCSV } from '@/utils/fileUtils';
+import { createFileInput, parseCSV, csvToTable, tableToCSV } from '@/utils/fileUtils';
+import { validateCsvFile, secureReadFile } from '@/utils/secureFileUtils';
 import { Table } from '@/types/database';
 
 export function useTableView(
@@ -16,8 +16,27 @@ export function useTableView(
       const file = await createFileInput('.csv');
       if (!file) return;
 
-      const csvText = await readFile(file);
+      const fileValidation = validateCsvFile(file);
+      if (!fileValidation.isValid) {
+        toast({
+          title: "Invalid File",
+          description: fileValidation.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const csvText = await secureReadFile(file);
       const { headers, rows } = parseCSV(csvText);
+      
+      if (headers.length === 0) {
+        toast({
+          title: "Invalid CSV",
+          description: "CSV file must have at least one column header.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       const tableName = file.name.replace('.csv', '');
       const newTable = csvToTable(headers, rows, tableName);

@@ -1,83 +1,161 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { Column } from '@/types/database';
+import { validateColumnValue, sanitizeInput } from '@/utils/validation';
 
 interface FormFieldInputProps {
   column: Column;
   value: any;
   onChange: (value: string | boolean | Date) => void;
-  hasError: boolean;
+  hasError?: boolean;
 }
 
 export function FormFieldInput({ column, value, onChange, hasError }: FormFieldInputProps) {
-  if (column.type === 'boolean') {
-    return (
-      <Checkbox
-        id={column.id}
-        checked={value || false}
-        onCheckedChange={(checked) => onChange(checked)}
-      />
-    );
-  }
+  const [validationError, setValidationError] = React.useState<string | null>(null);
 
-  if (column.type === 'date') {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground",
-              hasError && "border-red-500"
+  const handleValueChange = (newValue: any) => {
+    const validation = validateColumnValue(newValue, column.type);
+    setValidationError(validation.isValid ? null : validation.error || null);
+    onChange(newValue);
+  };
+
+  const getInputClassName = () => {
+    const baseClasses = "w-full";
+    return hasError || validationError ? `${baseClasses} border-red-500` : baseClasses;
+  };
+
+  switch (column.type) {
+    case 'text':
+    case 'varchar':
+      if (value && typeof value === 'string' && value.length > 100) {
+        return (
+          <div>
+            <Textarea
+              value={value || ''}
+              onChange={(e) => handleValueChange(sanitizeInput(e.target.value))}
+              placeholder={`Enter ${column.name}`}
+              className={getInputClassName()}
+              maxLength={1000}
+            />
+            {validationError && (
+              <p className="text-sm text-red-500 mt-1">{validationError}</p>
             )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? format(new Date(value), "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={value ? new Date(value) : undefined}
-            onSelect={(date) => date && onChange(date)}
-            initialFocus
-            className="p-3 pointer-events-auto"
+          </div>
+        );
+      }
+      return (
+        <div>
+          <Input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleValueChange(sanitizeInput(e.target.value))}
+            placeholder={`Enter ${column.name}`}
+            className={getInputClassName()}
+            maxLength={1000}
           />
-        </PopoverContent>
-      </Popover>
-    );
-  }
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{validationError}</p>
+          )}
+        </div>
+      );
 
-  if (column.type === 'number' || column.type === 'decimal') {
-    return (
-      <Input
-        id={column.id}
-        type="number"
-        step={column.type === 'decimal' ? '0.01' : '1'}
-        placeholder={`Enter ${column.name.toLowerCase()}...`}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        className={hasError ? 'border-red-500' : ''}
-      />
-    );
-  }
+    case 'number':
+    case 'decimal':
+      return (
+        <div>
+          <Input
+            type="number"
+            value={value || ''}
+            onChange={(e) => handleValueChange(e.target.value)}
+            placeholder={`Enter ${column.name}`}
+            className={getInputClassName()}
+            step={column.type === 'decimal' ? '0.01' : '1'}
+          />
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{validationError}</p>
+          )}
+        </div>
+      );
 
-  return (
-    <Input
-      id={column.id}
-      placeholder={`Enter ${column.name.toLowerCase()}...`}
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      className={hasError ? 'border-red-500' : ''}
-    />
-  );
+    case 'boolean':
+      return (
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            checked={Boolean(value)}
+            onCheckedChange={(checked) => handleValueChange(checked)}
+          />
+          <span className="text-sm">True</span>
+        </div>
+      );
+
+    case 'date':
+      return (
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={`${getInputClassName()} justify-start text-left font-normal`}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {value ? format(new Date(value), 'PPP') : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={value ? new Date(value) : undefined}
+                onSelect={(date) => handleValueChange(date || new Date())}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{validationError}</p>
+          )}
+        </div>
+      );
+
+    case 'uuid':
+      return (
+        <div>
+          <Input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleValueChange(sanitizeInput(e.target.value))}
+            placeholder="Enter UUID"
+            className={getInputClassName()}
+            pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+          />
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{validationError}</p>
+          )}
+        </div>
+      );
+
+    default:
+      return (
+        <div>
+          <Input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleValueChange(sanitizeInput(e.target.value))}
+            placeholder={`Enter ${column.name}`}
+            className={getInputClassName()}
+            maxLength={1000}
+          />
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{validationError}</p>
+          )}
+        </div>
+      );
+  }
 }

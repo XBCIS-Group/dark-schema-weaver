@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { createFileInput, readFile } from '@/utils/fileUtils';
+import { createFileInput } from '@/utils/fileUtils';
+import { secureReadFile, validateJsonFile, validateDatabaseSchema } from '@/utils/secureFileUtils';
 import { Database } from '@/types/database';
 
 export function useDatabaseOperations() {
@@ -29,13 +29,33 @@ export function useDatabaseOperations() {
       const file = await createFileInput('.json');
       if (!file) return;
 
-      const jsonText = await readFile(file);
+      const fileValidation = validateJsonFile(file);
+      if (!fileValidation.isValid) {
+        toast({
+          title: "Invalid File",
+          description: fileValidation.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const jsonText = await secureReadFile(file);
       const importedData = JSON.parse(jsonText);
+      
+      const schemaValidation = validateDatabaseSchema(importedData);
+      if (!schemaValidation.isValid) {
+        toast({
+          title: "Invalid Database Schema",
+          description: schemaValidation.error,
+          variant: "destructive",
+        });
+        return;
+      }
       
       const newDatabase: Database = {
         id: Date.now().toString(),
-        name: importedData.name || file.name.replace('.json', ''),
-        tables: importedData.tables || [],
+        name: schemaValidation.database!.name || file.name.replace('.json', ''),
+        tables: schemaValidation.database!.tables || [],
       };
 
       setDatabases(prev => [...prev, newDatabase]);
