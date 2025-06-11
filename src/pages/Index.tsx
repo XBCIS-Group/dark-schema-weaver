@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { DatabaseSidebar } from '@/components/DatabaseSidebar';
@@ -135,39 +137,56 @@ const Index = () => {
         <ErrorBoundary>
           <SidebarProvider>
             <div className="min-h-screen flex w-full">
-              <DatabaseSidebar
-                databases={databases}
-                selectedDatabase={selectedDatabase}
-                selectedTable={selectedTable}
-                onSelectDatabase={setSelectedDatabase}
-                onSelectTable={setSelectedTable}
-                onCreateDatabase={openCreateDatabase}
-                onCreateTable={openCreateTable}
-                onEditDatabase={handleEditDatabaseClick}
-                onEditTable={handleEditTableClick}
-                onDeleteDatabase={handleDeleteDatabase}
-                onDeleteTable={handleDeleteTable}
-                onImportDatabase={handleImportDatabase}
-                onExportDatabase={handleExportDatabase}
-              />
-              <main className="flex-1 flex flex-col h-full">
-                <div className="border-b border-border p-4 bg-card flex items-center justify-between">
-                  <SidebarTrigger />
-                  <ThemeToggle />
-                </div>
-                <ErrorBoundary>
-                  <TableView
-                    table={currentTable}
-                    onEditSchema={openSchemaEditor}
-                    onAddRow={handleOpenAddRow}
-                    onEditRow={handleEditRowClick}
-                    onDeleteRow={handleDeleteRow}
-                    onImportTable={handleImportTable}
-                    onUpdateTable={handleUpdateTable}
-                    onDeleteTable={handleDeleteTableFromView}
+              <ResizablePanelGroup 
+                direction="horizontal" 
+                className="min-h-screen w-full"
+              >
+                <ResizablePanel 
+                  defaultSize={20}
+                  minSize={15}
+                  maxSize={35}
+                  className="min-w-[250px] max-w-[500px]"
+                >
+                  <DatabaseSidebar
+                    databases={databases}
+                    selectedDatabase={selectedDatabase}
+                    selectedTable={selectedTable}
+                    onSelectDatabase={setSelectedDatabase}
+                    onSelectTable={setSelectedTable}
+                    onCreateDatabase={openCreateDatabase}
+                    onCreateTable={openCreateTable}
+                    onEditDatabase={handleEditDatabaseClick}
+                    onEditTable={handleEditTableClick}
+                    onDeleteDatabase={handleDeleteDatabase}
+                    onDeleteTable={handleDeleteTable}
+                    onImportDatabase={handleImportDatabase}
+                    onExportDatabase={handleExportDatabase}
                   />
-                </ErrorBoundary>
-              </main>
+                </ResizablePanel>
+                
+                <ResizableHandle withHandle className="w-2 bg-border hover:bg-border/80 transition-colors" />
+                
+                <ResizablePanel defaultSize={80} minSize={50}>
+                  <main className="flex-1 flex flex-col h-full">
+                    <div className="border-b border-border p-4 bg-card flex items-center justify-between">
+                      <SidebarTrigger />
+                      <ThemeToggle />
+                    </div>
+                    <ErrorBoundary>
+                      <TableView
+                        table={currentTable}
+                        onEditSchema={openSchemaEditor}
+                        onAddRow={handleOpenAddRow}
+                        onEditRow={handleEditRowClick}
+                        onDeleteRow={handleDeleteRow}
+                        onImportTable={handleImportTable}
+                        onUpdateTable={handleUpdateTable}
+                        onDeleteTable={handleDeleteTableFromView}
+                      />
+                    </ErrorBoundary>
+                  </main>
+                </ResizablePanel>
+              </ResizablePanelGroup>
 
               <SchemaEditor
                 isOpen={schemaEditorOpen}
