@@ -229,11 +229,11 @@ export function DatabaseSidebar({
         <div className="flex gap-2">
           <Button size="sm" variant="outline" className="flex-1" onClick={onImportDatabase}>
             <Import className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Import Access</span>
+            <span className="truncate">Import</span>
           </Button>
           <Button size="sm" variant="outline" className="flex-1" onClick={onExportDatabase}>
             <Download className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Export Access</span>
+            <span className="truncate">Export</span>
           </Button>
         </div>
       </div>
