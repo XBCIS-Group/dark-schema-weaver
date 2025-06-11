@@ -49,7 +49,7 @@ export function SidebarPanel({
       defaultSize={sidebarSize}
       minSize={15}
       maxSize={40}
-      className="min-w-[200px] max-w-[400px]"
+      className="min-w-0 w-full max-w-none sm:min-w-[200px] sm:max-w-[400px] md:min-w-[250px] md:max-w-[450px]"
       onResize={(size) => setSidebarSize(size)}
     >
       <DatabaseSidebar

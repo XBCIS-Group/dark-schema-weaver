@@ -152,9 +152,37 @@
     @apply transition-all duration-200 ease-in-out;
   }
 
+  /* Responsive sidebar behavior */
+  .sidebar-responsive {
+    @apply w-full sm:w-auto;
+  }
+
   /* Table responsiveness */
   .table-responsive {
     @apply overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background;
+  }
+
+  /* Responsive text and spacing */
+  .responsive-text {
+    @apply text-sm sm:text-base;
+  }
+
+  .responsive-padding {
+    @apply p-2 sm:p-4;
+  }
+
+  .responsive-margin {
+    @apply m-2 sm:m-4;
+  }
+
+  /* Header responsiveness */
+  .header-responsive {
+    @apply flex items-center justify-between p-2 sm:p-4 gap-2 sm:gap-4;
+  }
+
+  /* Button group responsiveness */
+  .button-group-responsive {
+    @apply flex flex-col xs:flex-row gap-2 w-full xs:w-auto;
   }
 }
 
@@ -188,4 +216,23 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Responsive breakpoint utilities */
+@media (max-width: 640px) {
+  .sidebar-mobile-collapse {
+    display: none;
+  }
+  
+  .main-content-mobile {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+@media (min-width: 641px) {
+  .sidebar-desktop-resize {
+    resize: horizontal;
+    overflow: auto;
+  }
 }
