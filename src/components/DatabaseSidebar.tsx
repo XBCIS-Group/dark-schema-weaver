@@ -108,8 +108,8 @@ export function DatabaseSidebar({
   };
 
   return (
-    <div className="h-screen flex flex-col border-r border-border bg-sidebar fixed left-0 top-0 z-10">
-      <div className="flex-shrink-0 px-4 py-6 border-b border-border">
+    <Sidebar>
+      <SidebarHeader>
         <div className="flex items-center gap-2 mb-4">
           <Database className="h-6 w-6 text-primary flex-shrink-0" />
           <h1 className="text-xl font-bold text-sidebar-foreground truncate">Database Manager</h1>
@@ -123,110 +123,116 @@ export function DatabaseSidebar({
             className="pl-9 bg-background"
           />
         </div>
-      </div>
+      </SidebarHeader>
 
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-sm font-medium text-sidebar-foreground/70">Databases</span>
-            <Button size="sm" variant="ghost" onClick={onCreateDatabase} className="h-6 w-6 p-0">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="space-y-1">
-            {filteredDatabases.map((database) => (
-              <div key={database.id}>
-                <div className="flex items-center justify-between group">
-                  <Button
-                    variant={selectedDatabase === database.id ? "secondary" : "ghost"}
-                    className="flex-1 justify-start gap-2 h-8 px-2"
-                    onClick={() => handleDatabaseClick(database.id)}
-                  >
-                    <Database className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate text-sm">{database.name}</span>
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => e.stopPropagation()}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex items-center justify-between w-full">
+              <span className="text-sm font-medium text-sidebar-foreground/70">Databases</span>
+              <Button size="sm" variant="ghost" onClick={onCreateDatabase} className="h-6 w-6 p-0">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {filteredDatabases.map((database) => (
+                <div key={database.id}>
+                  <SidebarMenuItem>
+                    <div className="flex items-center justify-between group w-full">
+                      <SidebarMenuButton
+                        isActive={selectedDatabase === database.id}
+                        className="flex-1 justify-start gap-2"
+                        onClick={() => handleDatabaseClick(database.id)}
                       >
-                        <Settings className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-popover border border-border">
-                      <DropdownMenuItem onClick={() => onEditDatabase(database.id)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Database
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDeleteDatabase(database.id)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Database
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                
-                {expandedDatabases.has(database.id) && (
-                  <div className="ml-6 mt-2 space-y-1">
-                    <div className="flex items-center justify-between px-2">
-                      <span className="text-xs text-muted-foreground">Tables</span>
-                      <Button size="sm" variant="ghost" onClick={onCreateTable} className="h-4 w-4 p-0">
-                        <Plus className="h-3 w-3" />
-                      </Button>
+                        <Database className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate text-sm">{database.name}</span>
+                      </SidebarMenuButton>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Settings className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover border border-border">
+                          <DropdownMenuItem onClick={() => onEditDatabase(database.id)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Database
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDeleteDatabase(database.id)}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Database
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    {database.tables.map((table) => (
-                      <div key={table.id} className="flex items-center justify-between group">
-                        <Button
-                          variant={selectedTable === table.id ? "secondary" : "ghost"}
-                          size="sm"
-                          className="flex-1 justify-start gap-2 h-7 px-2"
-                          onClick={() => onSelectTable(table.id)}
-                        >
-                          <Table className="h-3 w-3 flex-shrink-0" />
-                          <span className="text-xs truncate">{table.name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto flex-shrink-0">
-                            {table.rows.length}
-                          </span>
+                  </SidebarMenuItem>
+                  
+                  {expandedDatabases.has(database.id) && (
+                    <div className="ml-6 mt-2 space-y-1">
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-xs text-muted-foreground">Tables</span>
+                        <Button size="sm" variant="ghost" onClick={onCreateTable} className="h-4 w-4 p-0">
+                          <Plus className="h-3 w-3" />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Settings className="h-2 w-2" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover border border-border">
-                            <DropdownMenuItem onClick={() => onEditTable(table.id)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Table
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => onDeleteTable(table.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Table
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </ScrollArea>
+                      {database.tables.map((table) => (
+                        <div key={table.id} className="flex items-center justify-between group">
+                          <Button
+                            variant={selectedTable === table.id ? "secondary" : "ghost"}
+                            size="sm"
+                            className="flex-1 justify-start gap-2 h-7 px-2"
+                            onClick={() => onSelectTable(table.id)}
+                          >
+                            <Table className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-xs truncate">{table.name}</span>
+                            <span className="text-xs text-muted-foreground ml-auto flex-shrink-0">
+                              {table.rows.length}
+                            </span>
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Settings className="h-2 w-2" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover border border-border">
+                              <DropdownMenuItem onClick={() => onEditTable(table.id)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Table
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => onDeleteTable(table.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Table
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      <div className="flex-shrink-0 p-4 border-t border-border">
+      <SidebarFooter>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" className="flex-1" onClick={onImportDatabase}>
             <Import className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -237,7 +243,7 @@ export function DatabaseSidebar({
             <span className="truncate">Export</span>
           </Button>
         </div>
-      </div>
-    </div>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
