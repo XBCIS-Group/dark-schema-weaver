@@ -102,11 +102,6 @@
   .light {
     color-scheme: light;
   }
-
-  /* Custom breakpoint for extra small screens */
-  @screen xs {
-    /* Custom styles for 375px and up */
-  }
 }
 
 @layer components {
