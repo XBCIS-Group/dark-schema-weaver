@@ -1,6 +1,12 @@
 
+import { Buffer } from 'buffer';
 import MDBReader from 'mdb-reader';
 import { Database, Table, Column, ColumnType } from '@/types/database';
+
+// Make Buffer available globally for mdb-reader dependencies
+if (typeof window !== 'undefined') {
+  (window as any).Buffer = Buffer;
+}
 
 const ACCESS_MIME_TYPES = [
   'application/msaccess',
