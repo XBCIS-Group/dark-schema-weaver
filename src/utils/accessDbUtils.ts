@@ -24,7 +24,9 @@ export const validateAccessFile = (file: File): { isValid: boolean; error?: stri
 };
 
 export const readAccessDatabase = async (file: File): Promise<Database> => {
-  const buffer = await file.arrayBuffer();
+  const arrayBuffer = await file.arrayBuffer();
+  // Convert ArrayBuffer to Buffer for mdb-reader
+  const buffer = Buffer.from(arrayBuffer);
   const mdb = new MDBReader(buffer);
   
   const tableNames = mdb.getTableNames();
@@ -36,26 +38,36 @@ export const readAccessDatabase = async (file: File): Promise<Database> => {
       continue;
     }
     
-    const table = mdb.getTable(tableName);
+    const mdbTable = mdb.getTable(tableName);
     const columns: Column[] = [];
     
-    // Convert Access columns to our format
-    table.columns.forEach((col, index) => {
-      const columnType = mapAccessTypeToColumnType(col.type);
+    // Get column data from the first row if available, or use getColumns if available
+    const tableData = mdbTable.getData();
+    const columnNames = mdbTable.getColumnNames();
+    
+    // Create columns based on available column names
+    columnNames.forEach((colName, index) => {
+      // Try to infer type from first data row
+      let columnType: ColumnType = 'text';
+      if (tableData.length > 0) {
+        const firstValue = tableData[0][colName];
+        columnType = inferColumnType(firstValue);
+      }
+      
       columns.push({
         id: `col_${index}`,
-        name: col.name,
+        name: colName,
         type: columnType,
-        nullable: !col.notNull,
-        primaryKey: false, // We'll detect this separately if needed
+        nullable: true,
+        primaryKey: false,
         unique: false,
-        autoIncrement: col.autoIncrement || false,
-        defaultValue: col.defaultValue || null,
+        autoIncrement: false,
+        defaultValue: null,
       });
     });
     
     // Convert Access rows to our format
-    const rows = table.getData().map((row, rowIndex) => {
+    const rows = tableData.map((row, rowIndex) => {
       const rowData: Record<string, any> = { id: rowIndex + 1 };
       columns.forEach(col => {
         rowData[col.name] = row[col.name] ?? null;
@@ -78,29 +90,29 @@ export const readAccessDatabase = async (file: File): Promise<Database> => {
   };
 };
 
-const mapAccessTypeToColumnType = (accessType: string): ColumnType => {
-  const type = accessType.toLowerCase();
-  
-  if (type.includes('text') || type.includes('memo') || type.includes('varchar')) {
+const inferColumnType = (value: any): ColumnType => {
+  if (value === null || value === undefined) {
     return 'text';
   }
-  if (type.includes('number') || type.includes('integer') || type.includes('long')) {
-    return 'number';
-  }
-  if (type.includes('currency') || type.includes('decimal') || type.includes('double')) {
-    return 'decimal';
-  }
-  if (type.includes('yesno') || type.includes('boolean')) {
-    return 'boolean';
-  }
-  if (type.includes('datetime') || type.includes('date')) {
-    return 'date';
-  }
-  if (type.includes('guid') || type.includes('replication')) {
-    return 'uuid';
+  
+  if (typeof value === 'number') {
+    return Number.isInteger(value) ? 'number' : 'decimal';
   }
   
-  return 'text'; // Default fallback
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+  
+  if (value instanceof Date) {
+    return 'date';
+  }
+  
+  // Check if string looks like a date
+  if (typeof value === 'string' && !isNaN(Date.parse(value))) {
+    return 'date';
+  }
+  
+  return 'text';
 };
 
 export const exportToAccessFormat = (database: Database): string => {
