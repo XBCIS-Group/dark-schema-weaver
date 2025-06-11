@@ -4,7 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { SidebarPanel } from '@/components/layout/SidebarPanel';
 import { MainContentPanel } from '@/components/layout/MainContentPanel';
 import { ResizableHandle } from '@/components/ui/resizable';
-import { DialogsContainer } from '@/components/DialogsContainer';
+import { DialogsContainer } from '@/components/layout/DialogsContainer';
 import { Database, Table } from '@/types/database';
 
 export default function Index() {
