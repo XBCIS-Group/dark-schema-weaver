@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -107,8 +108,8 @@ export function DatabaseSidebar({
   };
 
   return (
-    <div className="h-full flex flex-col border-r border-border bg-sidebar">
-      <div className="px-4 py-6 border-b border-border">
+    <div className="h-screen flex flex-col border-r border-border bg-sidebar">
+      <div className="flex-shrink-0 px-4 py-6 border-b border-border">
         <div className="flex items-center gap-2 mb-4">
           <Database className="h-6 w-6 text-primary flex-shrink-0" />
           <h1 className="text-xl font-bold text-sidebar-foreground truncate">Database Manager</h1>
@@ -124,7 +125,7 @@ export function DatabaseSidebar({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <ScrollArea className="flex-1">
         <div className="p-2">
           <div className="flex items-center justify-between px-2 mb-2">
             <span className="text-sm font-medium text-sidebar-foreground/70">Databases</span>
@@ -223,9 +224,9 @@ export function DatabaseSidebar({
             ))}
           </div>
         </div>
-      </div>
+      </ScrollArea>
 
-      <div className="p-4 border-t border-border">
+      <div className="flex-shrink-0 p-4 border-t border-border">
         <div className="flex gap-2">
           <Button size="sm" variant="outline" className="flex-1" onClick={onImportDatabase}>
             <Import className="h-4 w-4 mr-2 flex-shrink-0" />
