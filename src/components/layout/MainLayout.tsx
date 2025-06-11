@@ -21,7 +21,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                 className="min-h-screen w-full"
               >
                 {children}
-                <ResizableHandle withHandle />
               </ResizablePanelGroup>
             </div>
           </SidebarProvider>
