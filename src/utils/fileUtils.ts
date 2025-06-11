@@ -1,4 +1,3 @@
-
 import { ColumnType } from '@/types/database';
 
 export const downloadFile = (data: string, filename: string, type: string) => {

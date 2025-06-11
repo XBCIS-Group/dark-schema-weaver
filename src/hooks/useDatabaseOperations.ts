@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput } from '@/utils/fileUtils';
-import { secureReadFile, validateJsonFile, validateDatabaseSchema } from '@/utils/secureFileUtils';
+import { validateAccessFile, readAccessDatabase, exportToAccessFormat } from '@/utils/accessDbUtils';
 import { Database } from '@/types/database';
 
 export function useDatabaseOperations() {
@@ -26,10 +26,10 @@ export function useDatabaseOperations() {
 
   const handleImportDatabase = async () => {
     try {
-      const file = await createFileInput('.json');
+      const file = await createFileInput('.mdb,.accdb');
       if (!file) return;
 
-      const fileValidation = validateJsonFile(file);
+      const fileValidation = validateAccessFile(file);
       if (!fileValidation.isValid) {
         toast({
           title: "Invalid File",
@@ -39,34 +39,18 @@ export function useDatabaseOperations() {
         return;
       }
 
-      const jsonText = await secureReadFile(file);
-      const importedData = JSON.parse(jsonText);
+      const importedDatabase = await readAccessDatabase(file);
       
-      const schemaValidation = validateDatabaseSchema(importedData);
-      if (!schemaValidation.isValid) {
-        toast({
-          title: "Invalid Database Schema",
-          description: schemaValidation.error,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const newDatabase: Database = {
-        id: Date.now().toString(),
-        name: schemaValidation.database!.name || file.name.replace('.json', ''),
-        tables: schemaValidation.database!.tables || [],
-      };
-
-      setDatabases(prev => [...prev, newDatabase]);
+      setDatabases(prev => [...prev, importedDatabase]);
       toast({
-        title: "Database Imported",
-        description: `Successfully imported database from ${file.name}`,
+        title: "Access Database Imported",
+        description: `Successfully imported ${importedDatabase.tables.length} tables from ${file.name}`,
       });
     } catch (error) {
+      console.error('Import error:', error);
       toast({
         title: "Import Failed",
-        description: "Failed to import database. Please check the file format.",
+        description: "Failed to import Access database. Please check the file format.",
         variant: "destructive",
       });
     }
@@ -86,37 +70,37 @@ export function useDatabaseOperations() {
     if (!database) return;
 
     try {
-      // Create a file handle using the File System Access API
+      // Export as SQL file that can be imported into Access
+      const sqlData = exportToAccessFormat(database);
+      
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${database.name}.json`,
+          suggestedName: `${database.name}.sql`,
           types: [
             {
-              description: 'JSON files',
+              description: 'SQL files for Access import',
               accept: {
-                'application/json': ['.json'],
+                'text/sql': ['.sql'],
               },
             },
           ],
         });
 
         const writable = await fileHandle.createWritable();
-        const jsonData = JSON.stringify(database, null, 2);
-        await writable.write(jsonData);
+        await writable.write(sqlData);
         await writable.close();
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} to your chosen location`,
+          description: `Successfully exported ${database.name} as SQL file for Access import`,
         });
       } else {
         // Fallback for browsers that don't support File System Access API
-        const jsonData = JSON.stringify(database, null, 2);
-        const blob = new Blob([jsonData], { type: 'application/json' });
+        const blob = new Blob([sqlData], { type: 'text/sql' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${database.name}.json`;
+        a.download = `${database.name}.sql`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -124,7 +108,7 @@ export function useDatabaseOperations() {
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as JSON`,
+          description: `Successfully exported ${database.name} as SQL file for Access import`,
         });
       }
     } catch (error) {
