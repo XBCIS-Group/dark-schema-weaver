@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { ResizablePanelGroup } from '@/components/ui/resizable';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
