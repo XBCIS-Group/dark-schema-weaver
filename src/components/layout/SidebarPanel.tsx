@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ResizablePanel } from '@/components/ui/resizable';
 import { DatabaseSidebar } from '@/components/DatabaseSidebar';
 import { Database } from '@/types/database';
@@ -35,12 +35,22 @@ export function SidebarPanel({
   onImportDatabase,
   onExportDatabase,
 }: SidebarPanelProps) {
+  const [sidebarSize, setSidebarSize] = useState(() => {
+    const stored = localStorage.getItem('dbms-sidebar-size');
+    return stored ? parseInt(stored, 10) : 25;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('dbms-sidebar-size', sidebarSize.toString());
+  }, [sidebarSize]);
+
   return (
     <ResizablePanel 
-      defaultSize={20}
+      defaultSize={sidebarSize}
       minSize={15}
-      maxSize={35}
-      className="min-w-[250px] max-w-[500px]"
+      maxSize={40}
+      className="min-w-[200px] max-w-[400px]"
+      onResize={(size) => setSidebarSize(size)}
     >
       <DatabaseSidebar
         databases={databases}

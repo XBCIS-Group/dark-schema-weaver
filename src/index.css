@@ -102,6 +102,11 @@
   .light {
     color-scheme: light;
   }
+
+  /* Custom breakpoint for extra small screens */
+  @screen xs {
+    /* Custom styles for 375px and up */
+  }
 }
 
 @layer components {
@@ -128,4 +133,64 @@
   .connection-line {
     @apply stroke-muted-foreground stroke-2;
   }
+
+  /* Responsive layout utilities */
+  .responsive-grid {
+    @apply grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  .responsive-flex {
+    @apply flex flex-col sm:flex-row gap-4;
+  }
+
+  /* Modal responsiveness */
+  .modal-content {
+    @apply w-full max-w-lg mx-4 sm:mx-auto;
+  }
+
+  .modal-large {
+    @apply w-full max-w-4xl mx-4 sm:mx-auto;
+  }
+
+  /* Sidebar specific styles */
+  .sidebar-resizable {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Table responsiveness */
+  .table-responsive {
+    @apply overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background;
+  }
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-muted {
+  scrollbar-color: hsl(var(--muted)) transparent;
+}
+
+.scrollbar-track-background {
+  scrollbar-track-color: hsl(var(--background));
+}
+
+/* Webkit scrollbar styles for better browser support */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }

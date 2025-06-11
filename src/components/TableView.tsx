@@ -48,33 +48,43 @@ export function TableView({
   };
 
   if (!table) {
-    return <EmptyTableState onImportTable={handleImportTable} />;
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <EmptyTableState onImportTable={handleImportTable} />
+      </div>
+    );
   }
 
   return (
-    <div className="flex-1 flex flex-col">
-      <TableHeader
-        tableName={table.name}
-        columnCount={table.columns.length}
-        rowCount={table.rows.length}
-        filter={filter}
-        onFilterChange={setFilter}
-        onImportTable={handleImportTable}
-        onExportTable={handleExportTable}
-        onEditSchema={onEditSchema}
-        onAddRow={onAddRow}
-        onDeleteTable={onDeleteTable}
-      />
+    <div className="flex-1 flex flex-col h-full min-h-0">
+      <div className="flex-shrink-0">
+        <TableHeader
+          tableName={table.name}
+          columnCount={table.columns.length}
+          rowCount={table.rows.length}
+          filter={filter}
+          onFilterChange={setFilter}
+          onImportTable={handleImportTable}
+          onExportTable={handleExportTable}
+          onEditSchema={onEditSchema}
+          onAddRow={onAddRow}
+          onDeleteTable={onDeleteTable}
+        />
+      </div>
 
-      <SchemaOverview columns={table.columns} />
+      <div className="flex-shrink-0">
+        <SchemaOverview columns={table.columns} />
+      </div>
 
-      <DataTable
-        columns={table.columns}
-        rows={filteredRows}
-        onEditRow={onEditRow}
-        onDeleteRow={onDeleteRow}
-        onReorderRows={handleReorderRows}
-      />
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <DataTable
+          columns={table.columns}
+          rows={filteredRows}
+          onEditRow={onEditRow}
+          onDeleteRow={onDeleteRow}
+          onReorderRows={handleReorderRows}
+        />
+      </div>
     </div>
   );
 }

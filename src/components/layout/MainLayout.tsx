@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { ResizablePanelGroup } from '@/components/ui/resizable';
+import { ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -21,6 +21,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 className="min-h-screen w-full"
               >
                 {children}
+                <ResizableHandle withHandle />
               </ResizablePanelGroup>
             </div>
           </SidebarProvider>
