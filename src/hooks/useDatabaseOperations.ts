@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput } from '@/utils/fileUtils';
-import { validateAccessFile, readAccessDatabase, exportToAccessFormat } from '@/utils/accessDbUtils';
+import { validateAccessFile, readAccessDatabase, exportToJsonFormat } from '@/utils/accessDbUtils';
 import { Database } from '@/types/database';
 
 export function useDatabaseOperations() {
@@ -71,38 +71,37 @@ export function useDatabaseOperations() {
     if (!database) return;
 
     try {
-      // Export as Access database file
-      const accessData = exportToAccessFormat(database);
+      // Export as JSON format
+      const jsonData = exportToJsonFormat(database);
       
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${database.name}.mdb`,
+          suggestedName: `${database.name}.json`,
           types: [
             {
-              description: 'Microsoft Access Database',
+              description: 'Database JSON File',
               accept: {
-                'application/msaccess': ['.mdb'],
-                'application/x-msaccess': ['.mdb'],
+                'application/json': ['.json'],
               },
             },
           ],
         });
 
         const writable = await fileHandle.createWritable();
-        await writable.write(accessData);
+        await writable.write(jsonData);
         await writable.close();
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as Access database`,
+          description: `Successfully exported ${database.name} as JSON file`,
         });
       } else {
         // Fallback for browsers that don't support File System Access API
-        const blob = new Blob([accessData], { type: 'application/msaccess' });
+        const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${database.name}.mdb`;
+        a.download = `${database.name}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -110,7 +109,7 @@ export function useDatabaseOperations() {
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as Access database`,
+          description: `Successfully exported ${database.name} as JSON file`,
         });
       }
     } catch (error) {

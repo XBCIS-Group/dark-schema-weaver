@@ -1,4 +1,3 @@
-
 import { Buffer } from 'buffer';
 import MDBReader from 'mdb-reader';
 import { Database, Table, Column, ColumnType } from '@/types/database';
@@ -120,6 +119,46 @@ const inferColumnType = (value: any): ColumnType => {
   return 'text';
 };
 
+// Export database as JSON format that can be properly imported later
+export const exportToJsonFormat = (database: Database): string => {
+  const exportData = {
+    name: database.name,
+    exported: new Date().toISOString(),
+    tables: database.tables.map(table => ({
+      name: table.name,
+      columns: table.columns,
+      rows: table.rows
+    }))
+  };
+  
+  return JSON.stringify(exportData, null, 2);
+};
+
+// Keep the old function name for backwards compatibility
+export const exportToAccessFormat = (database: Database): string => {
+  return exportToJsonFormat(database);
+};
+
+const mapColumnTypeToAccessType = (columnType: ColumnType): string => {
+  switch (columnType) {
+    case 'text':
+    case 'varchar':
+      return 'TEXT(255)';
+    case 'number':
+      return 'LONG';
+    case 'decimal':
+      return 'CURRENCY';
+    case 'boolean':
+      return 'YESNO';
+    case 'date':
+      return 'DATETIME';
+    case 'uuid':
+      return 'TEXT(36)';
+    default:
+      return 'TEXT(255)';
+  }
+};
+
 // Create a basic Access-compatible MDB structure
 export const createAccessDatabase = (database: Database): ArrayBuffer => {
   // Since we can't create actual .mdb files in the browser without a full Access engine,
@@ -169,28 +208,4 @@ export const createAccessDatabase = (database: Database): ArrayBuffer => {
   
   // Convert to ArrayBuffer
   return encoder.encode(content).buffer;
-};
-
-export const exportToAccessFormat = (database: Database): ArrayBuffer => {
-  return createAccessDatabase(database);
-};
-
-const mapColumnTypeToAccessType = (columnType: ColumnType): string => {
-  switch (columnType) {
-    case 'text':
-    case 'varchar':
-      return 'TEXT(255)';
-    case 'number':
-      return 'LONG';
-    case 'decimal':
-      return 'CURRENCY';
-    case 'boolean':
-      return 'YESNO';
-    case 'date':
-      return 'DATETIME';
-    case 'uuid':
-      return 'TEXT(36)';
-    default:
-      return 'TEXT(255)';
-  }
 };
