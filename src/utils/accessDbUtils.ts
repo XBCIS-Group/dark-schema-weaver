@@ -122,46 +122,89 @@ const inferColumnType = (value: any): ColumnType => {
 
 // Export database as Excel workbook with each table as a worksheet
 export const exportToExcelFormat = (database: Database): ArrayBuffer => {
-  const workbook = XLSX.utils.book_new();
-  
-  database.tables.forEach(table => {
-    // Create worksheet data
-    const worksheetData: any[][] = [];
+  try {
+    console.log('Creating Excel workbook for database:', database.name);
+    const workbook = XLSX.utils.book_new();
     
-    // Add headers
-    const headers = table.columns.map(col => col.name);
-    worksheetData.push(headers);
+    if (!database.tables || database.tables.length === 0) {
+      throw new Error('Database has no tables to export');
+    }
     
-    // Add rows
-    table.rows.forEach(row => {
-      const rowData = table.columns.map(col => {
-        const value = row[col.name];
-        // Handle different data types for Excel
-        if (value === null || value === undefined) return '';
-        if (col.type === 'date' && value) {
-          return new Date(value);
-        }
-        return value;
-      });
-      worksheetData.push(rowData);
+    database.tables.forEach((table, index) => {
+      console.log(`Processing table ${index + 1}/${database.tables.length}: ${table.name}`);
+      
+      if (!table.columns || table.columns.length === 0) {
+        console.warn(`Table ${table.name} has no columns, skipping`);
+        return;
+      }
+      
+      // Create worksheet data
+      const worksheetData: any[][] = [];
+      
+      // Add headers
+      const headers = table.columns.map(col => col.name || 'Unnamed Column');
+      worksheetData.push(headers);
+      
+      // Add rows
+      if (table.rows && table.rows.length > 0) {
+        table.rows.forEach(row => {
+          const rowData = table.columns.map(col => {
+            const value = row[col.name];
+            // Handle different data types for Excel
+            if (value === null || value === undefined) return '';
+            if (col.type === 'date' && value) {
+              try {
+                return new Date(value);
+              } catch {
+                return value;
+              }
+            }
+            if (col.type === 'number' || col.type === 'decimal') {
+              const numValue = Number(value);
+              return isNaN(numValue) ? value : numValue;
+            }
+            return value;
+          });
+          worksheetData.push(rowData);
+        });
+      }
+      
+      // Create worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      
+      // Set column widths
+      const columnWidths = headers.map(header => ({ 
+        width: Math.max(String(header).length, 15) 
+      }));
+      worksheet['!cols'] = columnWidths;
+      
+      // Add worksheet to workbook with table name as sheet name
+      // Excel sheet names have restrictions, so we'll clean the name
+      let sheetName = table.name || `Table${index + 1}`;
+      sheetName = sheetName.replace(/[\\\/\?\*\[\]:]/g, '_').substring(0, 31);
+      
+      // Ensure unique sheet names
+      let finalSheetName = sheetName;
+      let counter = 1;
+      while (workbook.Sheets[finalSheetName]) {
+        finalSheetName = `${sheetName.substring(0, 28)}_${counter}`;
+        counter++;
+      }
+      
+      XLSX.utils.book_append_sheet(workbook, worksheet, finalSheetName);
+      console.log(`Added worksheet: ${finalSheetName}`);
     });
     
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    console.log('Writing Excel file to buffer');
+    // Write workbook to buffer
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    console.log('Excel export completed successfully');
     
-    // Set column widths
-    const columnWidths = headers.map(header => ({ width: Math.max(header.length, 15) }));
-    worksheet['!cols'] = columnWidths;
-    
-    // Add worksheet to workbook with table name as sheet name
-    // Excel sheet names have restrictions, so we'll clean the name
-    const sheetName = table.name.replace(/[\\\/\?\*\[\]]/g, '_').substring(0, 31);
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-  });
-  
-  // Write workbook to buffer
-  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  return excelBuffer.buffer;
+    return excelBuffer.buffer || excelBuffer;
+  } catch (error) {
+    console.error('Error in exportToExcelFormat:', error);
+    throw new Error(`Failed to create Excel file: ${(error as Error).message}`);
+  }
 };
 
 // Export database as JSON format that can be properly imported later

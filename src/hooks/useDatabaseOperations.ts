@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput } from '@/utils/fileUtils';
@@ -68,33 +67,60 @@ export function useDatabaseOperations() {
     }
 
     const database = databases.find(db => db.id === selectedDatabase);
-    if (!database) return;
+    if (!database) {
+      toast({
+        title: "Database Not Found",
+        description: "The selected database could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (database.tables.length === 0) {
+      toast({
+        title: "No Tables to Export",
+        description: "The selected database has no tables to export.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
+      console.log('Starting Excel export for database:', database.name);
+      
       // Export as Excel workbook
       const excelBuffer = exportToExcelFormat(database);
+      console.log('Excel buffer created successfully');
       
       if ('showSaveFilePicker' in window) {
-        const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${database.name}.xlsx`,
-          types: [
-            {
-              description: 'Excel Workbook',
-              accept: {
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+        try {
+          const fileHandle = await (window as any).showSaveFilePicker({
+            suggestedName: `${database.name}.xlsx`,
+            types: [
+              {
+                description: 'Excel Workbook',
+                accept: {
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                },
               },
-            },
-          ],
-        });
+            ],
+          });
 
-        const writable = await fileHandle.createWritable();
-        await writable.write(excelBuffer);
-        await writable.close();
+          const writable = await fileHandle.createWritable();
+          await writable.write(excelBuffer);
+          await writable.close();
 
-        toast({
-          title: "Database Exported",
-          description: `Successfully exported ${database.name} as Excel workbook with ${database.tables.length} worksheets`,
-        });
+          toast({
+            title: "Database Exported",
+            description: `Successfully exported ${database.name} as Excel workbook with ${database.tables.length} worksheets`,
+          });
+        } catch (saveError) {
+          if ((saveError as Error).name === 'AbortError') {
+            // User cancelled the save dialog
+            return;
+          }
+          throw saveError;
+        }
       } else {
         // Fallback for browsers that don't support File System Access API
         const blob = new Blob([excelBuffer], { 
@@ -115,13 +141,12 @@ export function useDatabaseOperations() {
         });
       }
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        toast({
-          title: "Export Failed",
-          description: "Failed to export database as Excel workbook.",
-          variant: "destructive",
-        });
-      }
+      console.error('Excel export error:', error);
+      toast({
+        title: "Export Failed",
+        description: `Failed to export database as Excel workbook: ${(error as Error).message}`,
+        variant: "destructive",
+      });
     }
   };
 
