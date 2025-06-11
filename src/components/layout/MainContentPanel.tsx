@@ -30,23 +30,25 @@ export function MainContentPanel({
 }: MainContentPanelProps) {
   return (
     <ResizablePanel defaultSize={80} minSize={50}>
-      <main className="flex-1 flex flex-col h-full">
-        <div className="border-b border-border p-4 bg-card flex items-center justify-between">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <div className="border-b border-border p-4 bg-card flex items-center justify-between flex-shrink-0">
           <SidebarTrigger />
           <ThemeToggle />
         </div>
-        <ErrorBoundary>
-          <TableView
-            table={currentTable}
-            onEditSchema={onEditSchema}
-            onAddRow={onAddRow}
-            onEditRow={onEditRow}
-            onDeleteRow={onDeleteRow}
-            onImportTable={onImportTable}
-            onUpdateTable={onUpdateTable}
-            onDeleteTable={onDeleteTable}
-          />
-        </ErrorBoundary>
+        <div className="flex-1 overflow-auto">
+          <ErrorBoundary>
+            <TableView
+              table={currentTable}
+              onEditSchema={onEditSchema}
+              onAddRow={onAddRow}
+              onEditRow={onEditRow}
+              onDeleteRow={onDeleteRow}
+              onImportTable={onImportTable}
+              onUpdateTable={onUpdateTable}
+              onDeleteTable={onDeleteTable}
+            />
+          </ErrorBoundary>
+        </div>
       </main>
     </ResizablePanel>
   );

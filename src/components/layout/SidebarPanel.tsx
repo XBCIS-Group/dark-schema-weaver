@@ -40,7 +40,7 @@ export function SidebarPanel({
       defaultSize={20}
       minSize={15}
       maxSize={35}
-      className="min-w-[250px] max-w-[500px]"
+      className="min-w-[250px] max-w-[500px] relative"
     >
       <DatabaseSidebar
         databases={databases}

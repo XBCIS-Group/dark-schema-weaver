@@ -108,7 +108,7 @@ export function DatabaseSidebar({
   };
 
   return (
-    <div className="h-screen flex flex-col border-r border-border bg-sidebar">
+    <div className="h-screen flex flex-col border-r border-border bg-sidebar fixed left-0 top-0 z-10">
       <div className="flex-shrink-0 px-4 py-6 border-b border-border">
         <div className="flex items-center gap-2 mb-4">
           <Database className="h-6 w-6 text-primary flex-shrink-0" />
