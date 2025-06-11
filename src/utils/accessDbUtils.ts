@@ -1,3 +1,4 @@
+
 import { Buffer } from 'buffer';
 import MDBReader from 'mdb-reader';
 import * as XLSX from 'xlsx';
@@ -16,20 +17,115 @@ const ACCESS_MIME_TYPES = [
   'application/x-mdb'
 ];
 
+const EXCEL_MIME_TYPES = [
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel'
+];
+
 export const validateAccessFile = (file: File): { isValid: boolean; error?: string } => {
-  if (file.size > 50 * 1024 * 1024) { // 50MB limit for Access files
-    return { isValid: false, error: 'Access database file must be less than 50MB' };
+  if (file.size > 50 * 1024 * 1024) { // 50MB limit for database files
+    return { isValid: false, error: 'Database file must be less than 50MB' };
   }
   
   const extension = file.name.toLowerCase();
-  if (!extension.endsWith('.mdb') && !extension.endsWith('.accdb')) {
-    return { isValid: false, error: 'File must have a .mdb or .accdb extension' };
+  if (!extension.endsWith('.mdb') && !extension.endsWith('.accdb') && !extension.endsWith('.xlsx')) {
+    return { isValid: false, error: 'File must have a .mdb, .accdb, or .xlsx extension' };
   }
   
   return { isValid: true };
 };
 
 export const readAccessDatabase = async (file: File): Promise<Database> => {
+  const extension = file.name.toLowerCase();
+  
+  if (extension.endsWith('.xlsx')) {
+    return readExcelDatabase(file);
+  } else {
+    return readMDBDatabase(file);
+  }
+};
+
+const readExcelDatabase = async (file: File): Promise<Database> => {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  
+  const tables: Table[] = [];
+  
+  for (const sheetName of workbook.SheetNames) {
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    if (jsonData.length === 0) continue;
+    
+    // First row as headers
+    const headers = jsonData[0] as string[];
+    const dataRows = jsonData.slice(1);
+    
+    if (headers.length === 0) continue;
+    
+    // Create columns based on headers and infer types from data
+    const columns: Column[] = headers.map((header, index) => {
+      let columnType: ColumnType = 'text';
+      
+      // Infer type from first few non-empty values
+      for (const row of dataRows.slice(0, 10)) {
+        const value = (row as any[])[index];
+        if (value !== null && value !== undefined && value !== '') {
+          columnType = inferColumnType(value);
+          break;
+        }
+      }
+      
+      return {
+        id: `col_${index}`,
+        name: String(header || `Column${index + 1}`),
+        type: columnType,
+        nullable: true,
+        primaryKey: false,
+        unique: false,
+        autoIncrement: false,
+        defaultValue: null,
+      };
+    });
+    
+    // Convert rows to our format
+    const rows = dataRows.map((row, rowIndex) => {
+      const rowData: Record<string, any> = { id: rowIndex + 1 };
+      columns.forEach((col, colIndex) => {
+        const value = (row as any[])[colIndex];
+        
+        // Handle Excel date values
+        if (col.type === 'date' && typeof value === 'number') {
+          // Excel date serial number to JS Date
+          const excelDate = XLSX.SSF.parse_date_code(value);
+          if (excelDate) {
+            rowData[col.name] = new Date(excelDate.y, excelDate.m - 1, excelDate.d).toISOString().split('T')[0];
+          } else {
+            rowData[col.name] = value;
+          }
+        } else {
+          rowData[col.name] = value ?? null;
+        }
+      });
+      return rowData;
+    });
+    
+    tables.push({
+      id: Date.now().toString() + '_' + sheetName + '_' + Math.random(),
+      name: sheetName,
+      columns,
+      rows,
+    });
+  }
+  
+  return {
+    id: Date.now().toString(),
+    name: file.name.replace(/\.(xlsx)$/i, ''),
+    tables,
+  };
+};
+
+const readMDBDatabase = async (file: File): Promise<Database> => {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   const mdb = new MDBReader(buffer);

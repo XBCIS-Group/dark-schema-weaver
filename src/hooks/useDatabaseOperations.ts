@@ -26,7 +26,7 @@ export function useDatabaseOperations() {
 
   const handleImportDatabase = async () => {
     try {
-      const file = await createFileInput('.mdb,.accdb');
+      const file = await createFileInput('.mdb,.accdb,.xlsx');
       if (!file) return;
 
       const fileValidation = validateAccessFile(file);
@@ -42,15 +42,17 @@ export function useDatabaseOperations() {
       const importedDatabase = await readAccessDatabase(file);
       
       setDatabases(prev => [...prev, importedDatabase]);
+      
+      const fileType = file.name.toLowerCase().endsWith('.xlsx') ? 'Excel workbook' : 'Access database';
       toast({
-        title: "Access Database Imported",
+        title: `${fileType} Imported`,
         description: `Successfully imported ${importedDatabase.tables.length} tables from ${file.name}`,
       });
     } catch (error) {
       console.error('Import error:', error);
       toast({
         title: "Import Failed",
-        description: "Failed to import Access database. Please check the file format.",
+        description: "Failed to import database file. Please check the file format.",
         variant: "destructive",
       });
     }
