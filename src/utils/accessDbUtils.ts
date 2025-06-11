@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import MDBReader from 'mdb-reader';
+import * as XLSX from 'xlsx';
 import { Database, Table, Column, ColumnType } from '@/types/database';
 
 // Make Buffer available globally for mdb-reader dependencies
@@ -117,6 +118,50 @@ const inferColumnType = (value: any): ColumnType => {
   }
   
   return 'text';
+};
+
+// Export database as Excel workbook with each table as a worksheet
+export const exportToExcelFormat = (database: Database): ArrayBuffer => {
+  const workbook = XLSX.utils.book_new();
+  
+  database.tables.forEach(table => {
+    // Create worksheet data
+    const worksheetData: any[][] = [];
+    
+    // Add headers
+    const headers = table.columns.map(col => col.name);
+    worksheetData.push(headers);
+    
+    // Add rows
+    table.rows.forEach(row => {
+      const rowData = table.columns.map(col => {
+        const value = row[col.name];
+        // Handle different data types for Excel
+        if (value === null || value === undefined) return '';
+        if (col.type === 'date' && value) {
+          return new Date(value);
+        }
+        return value;
+      });
+      worksheetData.push(rowData);
+    });
+    
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    // Set column widths
+    const columnWidths = headers.map(header => ({ width: Math.max(header.length, 15) }));
+    worksheet['!cols'] = columnWidths;
+    
+    // Add worksheet to workbook with table name as sheet name
+    // Excel sheet names have restrictions, so we'll clean the name
+    const sheetName = table.name.replace(/[\\\/\?\*\[\]]/g, '_').substring(0, 31);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  });
+  
+  // Write workbook to buffer
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return excelBuffer.buffer;
 };
 
 // Export database as JSON format that can be properly imported later

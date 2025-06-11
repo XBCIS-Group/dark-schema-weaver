@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput } from '@/utils/fileUtils';
-import { validateAccessFile, readAccessDatabase, exportToJsonFormat } from '@/utils/accessDbUtils';
+import { validateAccessFile, readAccessDatabase, exportToExcelFormat } from '@/utils/accessDbUtils';
 import { Database } from '@/types/database';
 
 export function useDatabaseOperations() {
@@ -71,37 +71,39 @@ export function useDatabaseOperations() {
     if (!database) return;
 
     try {
-      // Export as JSON format
-      const jsonData = exportToJsonFormat(database);
+      // Export as Excel workbook
+      const excelBuffer = exportToExcelFormat(database);
       
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${database.name}.json`,
+          suggestedName: `${database.name}.xlsx`,
           types: [
             {
-              description: 'Database JSON File',
+              description: 'Excel Workbook',
               accept: {
-                'application/json': ['.json'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
               },
             },
           ],
         });
 
         const writable = await fileHandle.createWritable();
-        await writable.write(jsonData);
+        await writable.write(excelBuffer);
         await writable.close();
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as JSON file`,
+          description: `Successfully exported ${database.name} as Excel workbook with ${database.tables.length} worksheets`,
         });
       } else {
         // Fallback for browsers that don't support File System Access API
-        const blob = new Blob([jsonData], { type: 'application/json' });
+        const blob = new Blob([excelBuffer], { 
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${database.name}.json`;
+        a.download = `${database.name}.xlsx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -109,14 +111,14 @@ export function useDatabaseOperations() {
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as JSON file`,
+          description: `Successfully exported ${database.name} as Excel workbook with ${database.tables.length} worksheets`,
         });
       }
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
         toast({
           title: "Export Failed",
-          description: "Failed to export database.",
+          description: "Failed to export database as Excel workbook.",
           variant: "destructive",
         });
       }
