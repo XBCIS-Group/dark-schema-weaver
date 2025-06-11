@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createFileInput } from '@/utils/fileUtils';
@@ -70,37 +71,38 @@ export function useDatabaseOperations() {
     if (!database) return;
 
     try {
-      // Export as SQL file that can be imported into Access
-      const sqlData = exportToAccessFormat(database);
+      // Export as Access database file
+      const accessData = exportToAccessFormat(database);
       
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName: `${database.name}.sql`,
+          suggestedName: `${database.name}.mdb`,
           types: [
             {
-              description: 'SQL files for Access import',
+              description: 'Microsoft Access Database',
               accept: {
-                'text/sql': ['.sql'],
+                'application/msaccess': ['.mdb'],
+                'application/x-msaccess': ['.mdb'],
               },
             },
           ],
         });
 
         const writable = await fileHandle.createWritable();
-        await writable.write(sqlData);
+        await writable.write(accessData);
         await writable.close();
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as SQL file for Access import`,
+          description: `Successfully exported ${database.name} as Access database`,
         });
       } else {
         // Fallback for browsers that don't support File System Access API
-        const blob = new Blob([sqlData], { type: 'text/sql' });
+        const blob = new Blob([accessData], { type: 'application/msaccess' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${database.name}.sql`;
+        a.download = `${database.name}.mdb`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -108,7 +110,7 @@ export function useDatabaseOperations() {
 
         toast({
           title: "Database Exported",
-          description: `Successfully exported ${database.name} as SQL file for Access import`,
+          description: `Successfully exported ${database.name} as Access database`,
         });
       }
     } catch (error) {

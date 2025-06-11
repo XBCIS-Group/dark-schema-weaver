@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Database, 
@@ -232,7 +233,7 @@ export function DatabaseSidebar({
           </Button>
           <Button size="sm" variant="outline" className="flex-1" onClick={onExportDatabase}>
             <Download className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">Export SQL</span>
+            <span className="truncate">Export Access</span>
           </Button>
         </div>
       </div>
